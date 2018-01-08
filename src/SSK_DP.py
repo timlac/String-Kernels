@@ -24,7 +24,7 @@ def kdoubleprime(s, t, i):
 				j.append(m);
 
 		for j_ in j:			
-			k__ += kprime(s, t[0:j_], i-1) * lambdaval**(len(t) - j_ + 2);
+			k__ += kprime(s, t[0:j_], i-1) * lambdaval**(len(t) - j_ + 1);
 
 		return k__
 	
