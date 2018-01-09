@@ -1,3 +1,5 @@
+#! /usr/bin/env python
+
 from bs4 import BeautifulSoup
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
@@ -15,16 +17,18 @@ def preprocess_nltk(text):
 
 
 def preprocess_regex(text):
-    p1 = re.compile(r'([^\w\s\'])')  # Removes everything except a-Z, and '.
+    p1 = re.compile(r'([^\w\s\'])')  # Removes everything except a-Z, and '
     p2 = re.compile(r'(\'(\w+)\')')  # Remove quotes
     text = p2.sub(r'\g<2>', p1.sub(r'', text).lower())
     words = text.split()
     word_filter = set(stopwords.words('english'))
-    filtered_words = [word for word in words if word not in word_filter]
+    filtered_words = [
+        word.replace('\'', '') for word in words if word not in word_filter
+    ]
     return ' '.join(filtered_words)
 
 
-def process_directory(path):
+def process_directory(path, category_filter=None):
     filenames = [
         filename for filename in os.listdir(path)
         if filename.startswith('reut2-')
