@@ -38,22 +38,22 @@ def process_directory(path, category_filter=None):
     test = []
     titles = {}
     texts = {}
-    categories = {}
+    classes = {}
 
     for filename in filenames:
         print(filename)
-        _train, _test, _titles, _texts, _categories = process_file(
-            path + filename)
+        _train, _test, _titles, _texts, _classes = process_file(
+            path + filename, category_filter)
         train.extend(_train)
         test.extend(_test)
         titles.update(_titles)
         texts.update(_texts)
-        categories.update(_categories)
+        classes.update(_classes)
 
-    return train, test, titles, texts, categories
+    return train, test, titles, texts, classes
 
 
-def process_file(filename):
+def process_file(filename, category_filter=None):
     # lists with ids for which documents are in training and testing
     train = []
     test = []
@@ -61,7 +61,7 @@ def process_file(filename):
     # data
     titles = {}
     texts = {}
-    categories = {}
+    classes = {}
 
     with open(filename, 'r') as sgml_file:
         corpus = BeautifulSoup(sgml_file.read())
@@ -76,28 +76,34 @@ def process_file(filename):
                     document['lewissplit'] == 'TRAIN'
                     or document['lewissplit'] == 'TEST'):
                 document_id = int(document['newid'])
-                categories[document_id] = []
+                categories = []
 
                 for topic in document.topics.contents:
-                    categories[document_id].append(' '.join(topic.contents))
+                    if category_filter is not None:
+                        if any(category in topic.contents
+                               for category in category_filter):
+                            categories.extend(topic.contents)
+                    else:
+                        categories.extend(topic.contents)
+                if categories:
+                    classes[document_id] = categories
+                    if document.title is None:
+                        title = ''
+                    else:
+                        title = document.title.contents[0]
 
-                if document.title is None:
-                    title = ''
-                else:
-                    title = document.title.contents[0]
+                    titles[document_id] = title
 
-                titles[document_id] = title
+                    if document.body is None:
+                        body = ''
+                    else:
+                        body = document.body.contents[0]
 
-                if document.body is None:
-                    body = ''
-                else:
-                    body = document.body.contents[0]
+                    texts[document_id] = preprocess_regex(body)
 
-                texts[document_id] = preprocess_regex(body)
+                    if document['lewissplit'] == 'TRAIN':
+                        train.append(document_id)
+                    else:
+                        test.append(document_id)
 
-                if document['lewissplit'] == 'TRAIN':
-                    train.append(document_id)
-                else:
-                    test.append(document_id)
-
-    return train, test, titles, texts, categories
+    return train, test, titles, texts, classes
