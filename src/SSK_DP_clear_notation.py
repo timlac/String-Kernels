@@ -21,7 +21,7 @@ def K(n, sx, t):
     sum = 0
     for j, tj in enumerate(t):
         if tj == x:
-            sum += K_prime(n-1, s, t[0: j - 1]) * (lam ** 2)
+            sum += K_prime(n-1, s, t[0: j]) * (lam ** 2)
 
     return K(n, s, t) + sum
 
@@ -57,7 +57,7 @@ def K_double_prime(i, sx, t):
         sum = 0
         for j, tj in enumerate(t):
             if tj == x:
-                sum += K_prime(i-1, s, t[0: -1]) * lam ** (len(t) - j + 1)
+                sum += K_prime(i-1, s, t[0: j]) * lam ** (len(t) - j + 1)
 
         return sum
 
@@ -71,7 +71,8 @@ def main():
     control_values = [0.580, 0.580, 0.478, 0.439, 0.406, 0.370]
     s = "science is organized knowledge"
     t = "wisdom is organized life"
-    for n in range(2, 7):
+
+    for n in range(1, 7):
         K = K_norm(n, s, t)
         print(n, K, 'should be', control_values[n - 1])
 

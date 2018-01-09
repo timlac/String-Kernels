@@ -28,7 +28,6 @@ def kdoubleprime(s, t, i):
 
         return k__
 
-
 # K'_i(s,t)
 def kprime(s, t, i):
     if i <= 0:
