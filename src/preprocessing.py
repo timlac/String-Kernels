@@ -7,7 +7,7 @@ import re
 import os
 
 
-# Should all numbers be removed as well?
+
 # Should a advanced tokenizer be used or should we keep it simple?
 def preprocess_nltk(text):
     words = word_tokenize(text.lower())
@@ -28,7 +28,7 @@ def preprocess_regex(text):
     return ' '.join(filtered_words)
 
 
-def process_directory(path, category_filter=None):
+def process_directory(path='../data/', category_filter=None):
     filenames = [
         filename for filename in os.listdir(path)
         if filename.startswith('reut2-')
