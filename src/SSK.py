@@ -1,7 +1,6 @@
 # code for the kernel - similarity measure between two strings based on non-contiguous substrings
 # obs: this document i made mostly to understand the basics of the kernel, its a "naive" implementation
 
-
 import numpy as np
 from math import sqrt
 

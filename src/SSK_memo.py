@@ -44,6 +44,7 @@ for s_ in range(len(s) + 1):
             j = [pos for pos, char in enumerate(s) if char == x]
             ks[s_][t_] = ks[s_ - 1][t_] + lambdaval ** 2 * sum([kprimes[n - 1][s_ - 1][t_ - j_] for j_ in j])
 
+
 print(kdoubleprimes, 'kdoubleprimes')
 print(kprimes, 'kprimes')
 print(ks, 'ks')
