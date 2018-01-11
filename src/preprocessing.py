@@ -66,6 +66,7 @@ def process_file(filename, category_filter=None):
         corpus = BeautifulSoup(sgml_file.read())
 
         for document in corpus('reuters'):
+
             # Check if document is "ModApte"
             # According to the README (VIII.B.)
             # Training: lewissplit=train, topics=yes
@@ -131,3 +132,4 @@ def get_labels(classes,
                     j = label_index[label]
                     y[i, j] = 1
     return label_index, y
+

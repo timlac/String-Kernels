@@ -526,4 +526,5 @@ TSWLatexianTemp*
 # standalone packages
 *.sta
 
-
+# tims filer
+tims/	
