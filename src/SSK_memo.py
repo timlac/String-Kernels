@@ -4,6 +4,7 @@
 import numpy as np
 from math import sqrt
 
+lambdaval = 0.5  # decay factor - penalizes non-contiguous substrings, value between 0 and 1
 
 # DP method to find inner product between s and t
 def kernel(s, t, n):
@@ -59,13 +60,6 @@ def normkernel(s, t, n):
 
 
 
-lambdaval = 0.5; # decay factor - penalizes non-contiguous substrings, value between 0 and 1
-
-s = "cat"
-t = "car"
-n = 2
-
-
 #### examples to check that its working ########
 #print('k(car, car, 1) = ', kernel('car', 'car', 1), 'should be 3*lambda^2 = .75')
 #print('k(car, car, 2) = ', kernel('car', 'car', 2), ' should be lambda^6 + 2*lambda^4 = 0.140625')
@@ -76,6 +70,7 @@ n = 2
 #print('normkernel(cat, car, 2) = ', normkernel('cat', 'car', 2), 'should be 1/(2+lambda^2) = 0.44444')
 
 #print(kernel("AxxxxxxxxxB","AyB", 2), 'should be =0.5^14 = 0,00006103515625')
+
 
 print(kernel("AxxxxxxxxxB","AxxxxxxxxxB", 2), 'should be 12.761724710464478')
 print(kernel("ab","abb", 2), 'should be 0.5^5 + 0.5^4 = 0,09375')
