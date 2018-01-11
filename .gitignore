@@ -527,3 +527,6 @@ TSWLatexianTemp*
 *.sta
 
 
+/.idea/modules.xml
+/.idea/misc.xml
+/.idea/DD2343-Project.iml

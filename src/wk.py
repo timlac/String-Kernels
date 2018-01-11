@@ -55,6 +55,26 @@ def create_doc_word_matrix(texts, N):
 
 
 def tfidf(tf, df, n):
+    """
+    Computes the log-tfidf value.
+
+    Computes log(1 + tf) * log(n / df)
+
+    Parameters
+    ----------
+    tf : int
+        Term frequency, the  number of times the term occurs in a document.
+    df : int
+        Document term frequency, the number of documents that contains the term.
+    n : int
+        The total number of documents.
+
+    Returns
+    -------
+    float
+        log(1 + tf) * log(n / df)
+
+    """
     return log(1 + tf) * log(n / df)
 
 
