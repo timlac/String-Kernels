@@ -17,6 +17,7 @@ n = 2
 kdoubleprimes = np.zeros((n, len(s) + 1, len(t) + 1))
 kprimes = np.zeros((n, len(s) + 1, len(t) + 1))
 
+
 # 1st row
 for s_ in range(len(s) + 1):
     for t_ in range(len(t) + 1):
