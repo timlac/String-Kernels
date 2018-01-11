@@ -75,7 +75,7 @@ def make_data(index,
     texts = split_data(index, texts)
     classes = split_data(index, classes)
     document_index, X = create_doc_word_matrix(texts, n_features)
-    label_index, y = get_labels(classes, document_index, category_filter=category_filter)
+    label_index, y = get_classes(classes, document_index, category_filter=category_filter)
 
     return document_index, label_index, X, y
 

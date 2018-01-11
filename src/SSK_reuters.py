@@ -25,7 +25,7 @@ def make_data(index,
         mapper[idx] = document_id
         document_index[document_id] = idx
 
-    label_index, y = get_labels(classes, document_index, category_filter=category_filter)
+    label_index, y = get_classes(classes, document_index, category_filter=category_filter)
 
     return document_index, label_index, X, y, mapper
 
