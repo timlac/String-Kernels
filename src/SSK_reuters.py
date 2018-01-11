@@ -1,4 +1,4 @@
-from preprocessing import process_file, get_labels
+from preprocessing import process_file, get_classes
 from SVM import build_matrix
 import random
 from utils import split_data
