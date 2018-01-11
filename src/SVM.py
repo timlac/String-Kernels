@@ -64,6 +64,9 @@ def K_double_prime(i, sx, t):
 
 
 def K_norm(n, s, t):
+    # if len(s) or len(t) == 0:
+    #     return
+
     normalize = K(n, s, s) * K(n, t, t)
     return K(n, s, t) / sqrt(normalize)
 
@@ -72,7 +75,6 @@ def build_matrix(n, X, Y):
     for idx, s in enumerate(X):
         for jdx, t in enumerate(Y):
             Gram[idx, jdx] = K_norm(n, s, t)
-
     return Gram
 
 def main():
@@ -115,5 +117,5 @@ def main():
     print("\nclasses")
     print(clf.classes_)
 
-main()
+# main()
 
