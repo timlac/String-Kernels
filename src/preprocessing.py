@@ -3,12 +3,11 @@
 from bs4 import BeautifulSoup
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
+import numpy as np
 import re
 import os
 
 
-
-# Should a advanced tokenizer be used or should we keep it simple?
 def preprocess_nltk(text):
     words = word_tokenize(text.lower())
     word_filter = set(stopwords.words('english'))
@@ -67,7 +66,6 @@ def process_file(filename, category_filter=None):
         corpus = BeautifulSoup(sgml_file.read())
 
         for document in corpus('reuters'):
-
             # Check if document is "ModApte"
             # According to the README (VIII.B.)
             # Training: lewissplit=train, topics=yes
@@ -98,7 +96,6 @@ def process_file(filename, category_filter=None):
                         body = ''
                     else:
                         body = document.body.contents[0]
-
                     texts[document_id] = preprocess_regex(body)
 
                     if document['lewissplit'] == 'TRAIN':
@@ -107,3 +104,30 @@ def process_file(filename, category_filter=None):
                         test.append(document_id)
 
     return train, test, titles, texts, classes
+
+
+def get_all_labels(filename='../data/all-topics-strings.lc.txt'):
+    with open(filename, 'r') as label_file:
+        labels = label_file.read().split('\n')
+    return labels
+
+
+def get_labels(classes,
+               document_index,
+               filename='../data/all-topics-strings.lc.txt',
+               category_filter=None):
+    if category_filter is not None:
+        labels = category_filter
+    else:
+        labels = get_all_labels(filename)
+    label_index = {label: index for index, label in enumerate(labels)}
+    y = np.zeros((len(classes), len(label_index)))
+    label_filter = set(labels)
+    for document_id, document_labels in classes.items():
+        if document_labels is not None:
+            i = document_index[document_id]
+            for label in document_labels:
+                if label in label_filter:
+                    j = label_index[label]
+                    y[i, j] = 1
+    return label_index, y
