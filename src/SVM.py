@@ -9,6 +9,11 @@ def K(n, sx, t):
     sx, t = string 1, 2
     n = max length of sub strings"""
 
+    # print("in K")
+    # print("n: ", n)
+    # print("sx: ", sx)
+    # print("t: ", t)
+
     # stop recursion condition
     if min(len(sx), len(t)) < n:
         return 0
@@ -31,6 +36,12 @@ def K_prime(i, sx, t):
     """aiding function that:
     counts the length from the beginning of the the particular sequence through the end of string s and t
     instead of just counting the lengths"""
+
+    print("in K prime")
+    print("i: ", i)
+    print("sx: ", sx)
+    print("t: ", t)
+
     if i == 0:
         return 1
     if min(len(sx), len(t)) < i:
@@ -42,6 +53,13 @@ def K_prime(i, sx, t):
 
 def K_double_prime(i, sx, t):
     """function to speed up calculation of K_prime_i"""
+
+    # print("in K double prime")
+    # print("i: ", i)
+    # print("sx: ", sx)
+    # print("t: ", t)
+
+
     if min(len(sx), len(t)) < i:
         return 0
 
@@ -68,6 +86,10 @@ def K_norm(n, s, t):
     #     return
 
     normalize = K(n, s, s) * K(n, t, t)
+
+    if normalize == 0:
+        normalize = 1
+
     return K(n, s, t) / sqrt(normalize)
 
 def build_matrix(n, X, Y):

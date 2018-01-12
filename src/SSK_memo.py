@@ -33,6 +33,7 @@ def kernel(s, t, n):
                         kdoubleprimes[n_][s_][t_] = lambdaval * kdoubleprimes[n_][s_][t_ - 1] + lambdaval ** 2 * \
                                                     kprimes[n_ - 1][s_ - 1][t_ - 1]
                     else:
+                        # walk through string up to t_
                         j = [pos for pos, char in enumerate(t[0:t_ + 1]) if char == x]
                         kdoubleprimes[n_][s_][t_] = sum(
                             [kprimes[n_ - 1][s_ - 1][j_ - 1] * lambdaval ** (len_t - j_ + 1) for j_ in j]);
@@ -43,6 +44,7 @@ def kernel(s, t, n):
     #	print(kdoubleprimes, 'kdoubleprimes')
 
     # ks[x, y] = k_n(s[0:x+1], t[0:y+1])
+    # Final step
     ks = np.zeros((len(s), len(t)))  # K_n(s,t)
     for s_ in range(len(s)):
         for t_ in range(len(t)):
@@ -91,4 +93,3 @@ for x in range(1, 7):
     print(x, normkernel("science is organized knowledge", "wisdom is organized life", x), 'should be', kss[x - 1])
 
 ###########################################
-
