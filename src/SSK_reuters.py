@@ -3,7 +3,7 @@ from math import sqrt
 import numpy as np
 
 from preprocessing import get_classes
-from utils import split_data
+from utils import *
 from SSK_memo import K_memo
 
 
@@ -59,8 +59,8 @@ def make_data(index,
 
     random.shuffle(index)
     index = index[0:n_samples]
-    texts = split_data(index, texts)
-    classes = split_data(index, classes)
+    texts = filter_dict(index, texts)
+    classes = filter_dict(index, classes)
 
     document_index = {}
     X = []
