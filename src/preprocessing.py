@@ -116,7 +116,7 @@ def process_file(filename, category_filter=None):
     classes = {}
 
     with open(filename, 'r') as sgml_file:
-        corpus = BeautifulSoup(sgml_file.read())
+        corpus = BeautifulSoup(sgml_file.read(), 'html.parser')
 
         for document in corpus('reuters'):
 
