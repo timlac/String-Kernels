@@ -1,7 +1,7 @@
 from preprocessing import process_file, get_classes
 from SVM import build_matrix
 import random
-from utils import split_data
+from utils import filter_dict
 from wk import create_doc_word_matrix
 
 def make_data(index,
@@ -13,8 +13,8 @@ def make_data(index,
 
     random.shuffle(index)
     index = index[0:n_samples]
-    texts = split_data(index, texts)
-    classes = split_data(index, classes)
+    texts = filter_dict(index, texts)
+    classes = filter_dict(index, classes)
 
     document_index = {}
     X = []
