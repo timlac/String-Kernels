@@ -5,6 +5,105 @@ from nltk.corpus import stopwords
 import numpy as np
 import re
 import os
+from utils import shuffle_lists
+
+
+def data(n_train_samples=10000, n_test_samples=4000, filter_classes=[]):
+    """
+    Processes the reuters data to lists of text and classes.
+
+    Reads the Reuters corpus from files,
+    filters the data by the documents classes, shuffles it and then returns
+    n_train_samples and n_test_samples of data.
+
+    Parameters
+    ----------
+    n_train_samples : int
+        Number of training samples to be returned.
+    n_test_samples : int
+        Number of test samples to be returned.
+    filter_classes : list(str)
+        A list of the classes that should be included in the dataset.
+
+    Returns
+    -------
+    train_texts : list(str) [n_train_samples]
+        List of the document texts of the train subset.
+    train_classes : list(str) [n_train_samples]
+        List of the classes for each document of the train subset.
+    test_texts : list(str) [n_test_samples]
+        List of the document texts of the test subset.
+    test_classes : list(str) [n_train_samples]
+        List of the classes for each document of the test subset.
+    """
+    train, test, _, texts, classes = process_directory()
+
+    train = set(train)
+    test = set(test)
+
+    train_texts = []
+    train_classes = []
+
+    test_texts = []
+    test_classes = []
+
+    for id, text in texts.items():
+        if id in train:
+            train_texts.append(text)
+            train_classes.append(classes[id])
+        elif id in test:
+            test_texts.append(text)
+            test_classes.append(classes[id])
+
+    if filter_classes:
+        train_texts, train_classes = filter_by_class(
+            train_texts, train_classes, filter_classes)
+
+        test_texts, test_classes = filter_by_class(test_texts, test_classes,
+                                                   filter_classes)
+
+    train_texts, train_classes, test_texts, test_classes = shuffle_lists(
+        train_texts, train_classes, test_texts, test_classes)
+
+    train_texts = train_texts[:n_train_samples]
+    train_classes = train_classes[:n_train_samples]
+
+    test_texts = test_texts[:n_test_samples]
+    test_classes = test_classes[:n_test_samples]
+
+    return train_texts, train_classes, test_texts, test_classes
+
+
+def filter_by_class(texts, classes, filter_classes):
+    """
+    Removes all documents which classes are not in the filter_classes parameter.
+
+    Parameters
+    ----------
+    texts : list(str)
+        List of document texts.
+    classes : list(list(str))
+        List of classes for each document.
+
+    Returns
+    -------
+    new_text_list : list(str)
+        The filtered document list.
+    new_text_list : list(list(str))
+        The filtered document classes list.
+
+    """
+    new_text_list = []
+    new_classes_list = []
+    for i, classes in enumerate(classes):
+        filtered_classes = []
+        for cl in classes:
+            if cl in filter_classes:
+                filtered_classes.append(cl)
+        if filtered_classes:
+            new_text_list.append(texts[i])
+            new_classes_list.append(filtered_classes)
+    return new_text_list, new_classes_list
 
 
 def preprocess_regex(text):
@@ -36,7 +135,7 @@ def preprocess_regex(text):
 def process_directory(path='../data/', category_filter=None):
     """
     Reads and preprocesses the Reuters-21578 dataset.
-    
+
     The dataset is split using the "ModApte"-split.
 
     Parameters
@@ -160,6 +259,99 @@ def process_file(filename, category_filter=None):
     return train, test, titles, texts, classes
 
 
+def process_file_2(filename, category_filter=None):
+    """
+    Reads and preprocesses a file of the Reuters-21578 dataset.
+
+    The dataset is split using the "ModApte"-split.
+
+    Parameters
+    ----------
+    filename : string (optional)
+        Filename of the sgml file.
+    category_filter : list(str) (optional)
+        A list of which target the documents should have.
+
+    Returns
+    -------
+    train : list(int)
+        List of document-IDs which have the parameter "TRAIN".
+    test : list(int)
+        List of document-IDS which have the parameter "TEST".
+    titles : dict(int : str)
+        Map of document-IDS and the titles of the documents.
+    texts : dict(int : str)
+        Map of document-IDS and the texts of the documents.
+    classes: dict(int : list(str))
+        Map of document-IDS and the class or classes of the documents.
+    """
+    train_index_id_map = {}
+    train_data = []
+    train_target = []
+
+    test_index_id_map = {}
+    test_data = []
+    test_target = []
+
+    with open(filename, 'r') as sgml_file:
+        corpus = BeautifulSoup(sgml_file.read(), 'html.parser')
+
+    for document in corpus('reuters'):
+
+        # Check if document is "ModApte"
+        # According to the README (VIII.B.)
+        # Training: lewissplit=train, topics=yes
+        # Testing: lewissplit=test, topics=yes
+        if document['topics'] == 'YES' and (document['lewissplit'] == 'TRAIN'
+                                            or
+                                            document['lewissplit'] == 'TEST'):
+            document_id = int(document['newid'])
+            target = []
+            data = ''
+
+            for topic in document.topics.contents:
+                if category_filter is not None:
+                    if any(category in topic.contents
+                           for category in category_filter):
+                        target.extend(topic.contents)
+                else:
+                    target.extend(topic.contents)
+            if target:
+                if document.title is None:
+                    title = ''
+                else:
+                    title = document.title.contents[0]
+
+            if document.body is None:
+                body = ''
+            else:
+                body = document.body.contents[0]
+
+            data = title + ' ' + body
+            data = preprocess_regex(data)
+
+            if document['lewissplit'] == 'TRAIN':
+                train_index_id_map[len(train_data)] = document_id
+                train_data.append(data)
+                train_target.append(target)
+            else:
+                test_index_id_map[len(test_data)] = document_id
+                test_data.append(data)
+                test_target.append(target)
+    data = {}
+    test = {}
+    train = {}
+    test['map'] = test_index_id_map
+    test['data'] = test_data
+    test['target'] = test_target
+    train['map'] = train_index_id_map
+    train['data'] = train_data
+    train['target'] = train_target
+    data['test'] = test
+    data['train'] = train
+    return data
+
+
 def get_all_classes(filename='../data/all-topics-strings.lc.txt'):
     """
     Get all classes from the Reuters-21578 dataset.
@@ -167,7 +359,7 @@ def get_all_classes(filename='../data/all-topics-strings.lc.txt'):
     Parameters
     ----------
     filename : str
-        Filename of file containing a text file where each row is a unique class
+        Filename of file containing a text file where each row is a unique class.
 
     Returns
     -------
@@ -220,4 +412,3 @@ def get_classes(classes,
     # Reverse dict
     label_index = {v: k for k, v in label_index.items()}
     return label_index, y
-
