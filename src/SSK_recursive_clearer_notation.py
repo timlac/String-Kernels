@@ -3,7 +3,7 @@ from math import sqrt
 lam = 0.5
 
 
-def K(n, sx, t):
+def K_recursive(n, sx, t):
     """Kernel that gives the sum over all common sub sequences weighted according to their frequency and length
     sx, t = string 1, 2
     n = max length of sub strings"""
@@ -23,7 +23,11 @@ def K(n, sx, t):
         if tj == x:
             sum += K_prime(n-1, s, t[0: j]) * (lam ** 2)
 
-    return K(n, s, t) + sum
+    ret = K_recursive(n, s, t) + sum
+
+    print("K ret: ", ret)
+
+    return ret
 
 
 def K_prime(i, sx, t):
@@ -36,7 +40,11 @@ def K_prime(i, sx, t):
         return 0
 
     s = sx[0: -1]
-    return lam * K_prime(i, s, t) + K_double_prime(i, sx, t)
+
+    ret = lam * K_prime(i, s, t) + K_double_prime(i, sx, t)
+    print("K_prime ret: ", ret)
+
+    return ret
 
 
 def K_double_prime(i, sx, t):
@@ -50,7 +58,12 @@ def K_double_prime(i, sx, t):
     # if the two string share the same last letter, faster calculation
     if x == t[-1]:
         t = t[0: -1]
-        return lam * (K_double_prime(i, sx, t) + lam * K_prime(i-1, s, t))
+
+        ret = lam * (K_double_prime(i, sx, t) + lam * K_prime(i-1, s, t))
+
+        print("K double prime ret: ", ret)
+
+        return ret
 
     # else perform the original K'' calculation
     else:
@@ -59,12 +72,33 @@ def K_double_prime(i, sx, t):
             if tj == x:
                 sum += K_prime(i-1, s, t[0: j]) * lam ** (len(t) - j + 1)
 
+        print("K double prime ret: ", sum)
         return sum
 
 
+
 def K_norm(n, s, t):
-    normalize = K(n, s, s) * K(n, t, t)
-    return K(n, s, t) / sqrt(normalize)
+    print("\nstrings: ")
+    print("s = ", s)
+    print("t = ", t)
+    print("\nfirst kernel executing...")
+    k1 = K_recursive(n, s, s)
+    print("kernel(s, s, n) ", k1)
+    print("done")
+    print("\nsecond kernel executing...")
+    k2 = K_recursive(n, t, t)
+    print("kernel(t, t, n) ", k2)
+    print("done")
+    print("\nlast kernel executing...")
+    res = K_recursive(n, s, t) / sqrt(k1 * k2)
+    print("done. returning: ", res)
+    return res
+
+
+
+
+    # normalize = K(n, s, s) * K(n, t, t)
+    # return K(n, s, t) / sqrt(normalize)
 
 
 def main():
@@ -77,4 +111,4 @@ def main():
         print(n, K, 'should be', control_values[n - 1])
 
 
-main()
+# main()
