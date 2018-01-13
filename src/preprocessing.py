@@ -8,7 +8,13 @@ import os
 from utils import shuffle_lists
 
 
-def data(n_train_samples=10000, n_test_samples=4000, filter_classes=[]):
+def data(train,
+         test,
+         texts,
+         classes,
+         n_train_samples=10000,
+         n_test_samples=4000,
+         filter_classes=[]):
     """
     Processes the reuters data to lists of text and classes.
 
@@ -36,7 +42,6 @@ def data(n_train_samples=10000, n_test_samples=4000, filter_classes=[]):
     test_classes : list(str) [n_train_samples]
         List of the classes for each document of the test subset.
     """
-    train, test, _, texts, classes = process_directory()
 
     train = set(train)
     test = set(test)
@@ -121,7 +126,7 @@ def preprocess_regex(text):
         The preprocessed string.
 
     """
-    p1 = re.compile(r'([^\w\s\'])')  # Removes everything except a-Z, and '
+    p1 = re.compile(r'([^a-zA-Z\s\'])')  # Removes everything except a-Z, and '
     p2 = re.compile(r'(\'(\w+)\')')  # Remove quotes
     text = p2.sub(r'\g<2>', p1.sub(r'', text).lower())
     words = text.split()
@@ -249,7 +254,8 @@ def process_file(filename, category_filter=None):
                         body = ''
                     else:
                         body = document.body.contents[0]
-                    texts[document_id] = preprocess_regex(body)
+                    text = title + ' ' + body
+                    texts[document_id] = preprocess_regex(text)
 
                     if document['lewissplit'] == 'TRAIN':
                         train.append(document_id)
