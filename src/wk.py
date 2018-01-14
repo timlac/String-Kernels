@@ -22,7 +22,6 @@ from scipy.sparse import lil_matrix
 from sklearn.preprocessing import normalize
 from sklearn.svm import SVC
 from sklearn.multiclass import OneVsRestClassifier
-from utils import split_data
 from preprocessing import get_classes
 from preprocessing import process_directory
 import random

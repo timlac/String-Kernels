@@ -1,7 +1,6 @@
 import numpy as np
 from sklearn.metrics import precision_recall_fscore_support
 from utils import prepend_string_to_array
-from tabulate import tabulate
 
 def evaluate(y_test,
              y_pred,
@@ -95,4 +94,4 @@ def print_results(results, headers):
         line = prepend_string_to_array(k, v)
         table.append(line)
     headers.insert(0, 'Class')
-    return tabulate(table, headers=headers)
+    return table, headers

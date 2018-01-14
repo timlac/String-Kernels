@@ -9,6 +9,8 @@ from postprocessing import evaluate, evaulate_multiple_runs, print_results
 
 
 def train_target(train_classes, filter_classes=[]):
+    """make classes into vector for training"""
+
     if filter_classes:
         class_set = set(filter_classes)
     else:
