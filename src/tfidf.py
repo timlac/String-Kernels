@@ -5,7 +5,7 @@ from sklearn.multiclass import OneVsRestClassifier
 from sklearn.preprocessing import MultiLabelBinarizer
 from sklearn.svm import SVC
 from preprocessing import data, get_all_classes, process_directory
-from postprocessing import evaluate, evaulate_multiple_runs, print_results
+from postprocessing import evaluate, evaluate_multiple_runs, print_results
 
 
 def train_target(train_classes, filter_classes=[]):
@@ -72,16 +72,30 @@ def main(n_runs, n_train_samples, n_test_samples, n_features, filter_classes):
         y_test, y_pred = test(test_texts, test_classes, classifier, vectorizer,
                               mlb)
 
-        p, r, f1, s = evaluate(y_test, y_pred, mlb)
+        p, r, f1, s = evaluate(y_test, y_pred, mlb, filter_classes)
         precisions.append(p)
         recalls.append(r)
         f1_scores.append(f1)
         supports.append(s)
 
-    return evaulate_multiple_runs(n_runs, filter_classes, precisions, recalls,
-                                  f1_scores, supports)
+    return evaluate_multiple_runs(filter_classes, precisions, recalls, f1_scores, supports)
+
+
+def subset_evaluation():
+    r, h = main(10, 380, 90, 3000, ['earn', 'acq', 'crude', 'corn'])
+    print(print_results(r, h))
+    return r, h
+
+
+def complete_evaluation():
+    r, h = main(10, 10000, 4000, 3000, [
+        'earn', 'acq', 'money-fx', 'grain', 'crude', 'trade', 'interest',
+        'ship', 'wheat', 'corn'
+    ])
+
+    print(print_results(r, h))
+    return r, h
 
 
 if __name__ == '__main__':
-    r, h = main(2, 380, 90, 1000, ['earn', 'acq', 'crude', 'corn'])
-    print(print_results(r, h))
+    r, h = complete_evaluation()

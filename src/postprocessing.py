@@ -2,10 +2,11 @@ import numpy as np
 from sklearn.metrics import precision_recall_fscore_support
 from utils import prepend_string_to_array
 
+
 def evaluate(y_test,
              y_pred,
              multilabelbinarizer,
-             classes=['earn', 'acq', 'crude', 'corn']):
+             classes):
     """
     Evaluates the results.
 
@@ -55,9 +56,26 @@ def evaluate(y_test,
     return precision, recall, f1_score, support
 
 
-def evaulate_multiple_runs(n_runs, classes, precisions, recalls, f1_scores,
-                           supports):
+def evaluate_multiple_runs(classes, precisions, recalls, f1_scores, supports):
+    """
+    Wrapper for evaluate for multiple runs.
 
+    Calculates the mean and standard deviation for Precision, Recall, F1 and number of samples.
+
+    Parameters
+    ----------
+    classes : list(str)
+        A list of which classes that should be evaluated.
+    precisions : numpy.ndarray
+        Precisions for each of the run.
+    recalls
+    f1_scores
+    supports
+
+    Returns
+    -------
+
+    """
     precision_means = np.mean(precisions, axis=0)
     precision_stds = np.std(precisions, axis=0)
 
@@ -68,13 +86,13 @@ def evaulate_multiple_runs(n_runs, classes, precisions, recalls, f1_scores,
     f1_scores_stds = np.std(f1_scores, axis=0)
 
     supports_means = np.mean(supports, axis=0)
-    support_stds = np.mean(supports, axis=0)
+    support_stds = np.std(supports, axis=0)
 
     results = {}
 
     headers = [
         'F1 - Mean', 'F1 - SD', 'Precision - Mean', 'Precision - SD',
-        'Recall - Mean', 'Recall - SD', 'Test Samples - Mean'
+        'Recall - Mean', 'Recall - SD', 'Test Samples - Mean', 'Test Samples - SD'
     ]
 
     for i, c in enumerate(classes):
@@ -82,7 +100,7 @@ def evaulate_multiple_runs(n_runs, classes, precisions, recalls, f1_scores,
         results[c] = [
             f1_scores_means[i], f1_scores_stds[i], precision_means[i],
             precision_stds[i], recalls_means[i], recalls_stds[i],
-            supports_means[i]
+            supports_means[i], support_stds[i]
         ]
 
     return results, headers
