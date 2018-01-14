@@ -27,11 +27,14 @@ class GramCalc:
         # precompute kernel on all required combinations
         for row, s in enumerate(self.S):
             for col, t in enumerate(self.T):
-                self.mat[row, col] = self.kernel(self.n, s, t)
+                if self.mat[col, row] != 0:
+                    # symmetry
+                    self.mat[row, col] = self.mat[col, row]
+                else:
+                    self.mat[row, col] = self.kernel(self.n, s, t)
 
     def build_normalized(self):
         # build matrix from precomputed kernel values
-
         for row, s in enumerate(self.S):
             for col, t in enumerate(self.T):
 
