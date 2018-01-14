@@ -1,6 +1,6 @@
 import numpy as np
 from sklearn.metrics import precision_recall_fscore_support
-from utils import preppend_string_to_array
+from utils import prepend_string_to_array
 from tabulate import tabulate
 
 def evaluate(y_test,
@@ -92,7 +92,7 @@ def evaulate_multiple_runs(n_runs, classes, precisions, recalls, f1_scores,
 def print_results(results, headers):
     table = []
     for k, v in results.items():
-        line = preppend_string_to_array(k, v)
+        line = prepend_string_to_array(k, v)
         table.append(line)
     headers.insert(0, 'Class')
     return tabulate(table, headers=headers)
