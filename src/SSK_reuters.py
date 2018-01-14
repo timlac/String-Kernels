@@ -2,7 +2,7 @@ import random
 from math import sqrt
 import numpy as np
 
-from preprocessing import get_classes
+from preprocessing import get_classes, process_file
 from utils import *
 from SSK_memo import K_memo
 
@@ -27,11 +27,16 @@ class GramCalc:
         # precompute kernel on all required combinations
         for row, s in enumerate(self.S):
             for col, t in enumerate(self.T):
-                self.mat[row, col] = self.kernel(self.n, s, t)
+                if self.mat[col, row] != 0:
+                    # symmetry
+                    self.mat[row, col] = self.mat[col, row]
+                else:
+                    self.mat[row, col] = self.kernel(self.n, s, t)
+
+                print(self.mat)
 
     def build_normalized(self):
         # build matrix from precomputed kernel values
-
         for row, s in enumerate(self.S):
             for col, t in enumerate(self.T):
 
@@ -77,8 +82,24 @@ def make_data(index,
 
 
 def main():
-    X = ['qtly div nine cts vs eight cts prior pay may 12 record march 31 reuter', 'paralax restricted common shares three year warrants buy 318600 restricted shares six dlrs share paralax said holders american video convertible debentures elected exchange paralax restricted common market',
-         'sensormatic electronics corp said upped investment checkrobot']
+    # params
+    categories = ['earn', 'acq', 'ship', 'corn']
+    n_train_samples = 5000
+    n_test_samples = 100
+    n_features = 3000
+    n_samples = 5
+
+    # read all data
+    train_index, test_index, titles, texts, classes = process_file('../data/reut2-003.sgm', categories)
+
+    document_index, label_index, X, y, mapper = make_data(
+        train_index, texts, classes, n_samples, n_features, categories)
+
+
+    print(X)
+
+    # X = ['qtly div nine cts vs eight cts prior pay may 12 record march 31 reuter', 'paralax restricted common shares three year warrants buy 318600 restricted shares six dlrs share paralax said holders american video convertible debentures elected exchange paralax restricted common market',
+    #      'sensormatic electronics corp said upped investment checkrobot']
 
     n = 2
     GC = GramCalc(X, X, n, kernel=K_memo)
