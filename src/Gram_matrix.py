@@ -7,7 +7,7 @@ from multiprocessing import Pool
 from multiprocessing import cpu_count
 import time
 
-from preprocessing import get_classes, process_directory, data
+from preprocessing import get_classes, process_directory, data, process_file
 from utils import *
 from SSK import kernel
 from tfidf import train_target
@@ -78,8 +78,6 @@ class GramCalc:
         if not self.symmetric:
             for combo in norm_combos:
                 string_vector.append(combo)
-
-        print(string_vector)
 
         outputs = self.parallelize(string_vector)
 
@@ -250,6 +248,19 @@ def main():
     print(Gram_test_matrix)
 
     # evaluate(y_test, y_pred, mlb, filter_classes)
+def get_train_texts(n_samples):
+    _, _, _, texts, _ = process_file('../data/reut2-000.sgm')
+    train_texts = list(texts.values())[:n_samples]
+    return sorted(train_texts, key=len, reverse=True)
 
 
-main()
+def test(train_texts):
+    n = 2
+    GC_train = GramCalc(
+        train_texts, train_texts, n, kernel=kernel, symmetric=True)
+    Gram_train_matrix = GC_train.calculate(parallel=True)
+    return Gram_train_matrix
+
+
+if __name__ == '__main__':
+    main()
