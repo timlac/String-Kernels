@@ -1,74 +1,105 @@
-
 #	String Subsequence kernel - similarity measure between two strings based on contiguous and non-contiguous substrings
 #	uses dynamic programming algorithm for better performance
 
 import numpy as np
 from math import sqrt
 
-lambdaval = 0.5  # decay factor - penalizes non-contiguous substrings, value between 0 and 1
+lam = 0.5  # decay factor - penalizes non-contiguous substrings, value between 0 and 1
 
 
 """ Kernel that gives the sum over all common subsequences 
 weighted according to their frequency and length
 s, t = strings to be compared
 n = length of substrings """
-def kernel(s, t, n):
+def kernel(n, S, T):
+    if min(len(S), len(T)) < n:
+        return 0
 
-	#	calculate kprime and kdoubleprime for 
-	#	all partial versions of s and t	
-	kdoubleprimes = np.zeros((n, len(s), len(t)))
-	kprimes = np.zeros((n, len(s), len(t)))
+    # K prime matrix
+    Kp = np.zeros((n, len(S)+1, len(T)+1))
 
-	#	1st row - only kprime is calculated
-	for s_ in range(len(s)):
-		for t_ in range(len(t)):
-			kprimes[0][s_][t_] = 1;
-			
-	#	rest of the rows - both kprime and kdoubleprime 
-	#	are calculated
-	for i in range(1, n):
-		for s_ in range(len(s)):
-			for t_ in range(len(t)):
-				len_s, len_t = s_+1, t_+1
-				if(min(len_s, len_t) < i):
-					kdoubleprimes[i][s_][t_] = 0;
-					kprimes[i][s_][t_] = 0;
-				else:
-					x = s[s_]
-					z = t[t_]
-					if(x == z):
-						kdoubleprimes[i][s_][t_] = lambdaval * kdoubleprimes[i][s_][t_-1] + lambdaval**2 * kprimes[i-1][s_-1][t_-1]
-					else:
-						j = [pos for pos, char in enumerate(t[0:t_+1]) if char == x]
-						kdoubleprimes[i][s_][t_] = sum([kprimes[i-1][s_-1][j_-1] * lambdaval**(len_t-j_+1) for j_ in j]);
+    # K double prime matrix
+    Kpp = np.zeros((n, len(S)+1, len(T)+1))
 
-					kprimes[i][s_][t_] = lambdaval * kprimes[i][s_-1][t_] + kdoubleprimes[i][s_][t_];
-			
+    # 1st row
+    for s in range(len(S)+1):
+        for t in range(len(T)+1):
+            Kp[0][s][t] = 1
 
-	#	final step - calculate k_n(s, t)
-	ks = np.zeros((len(s), len(t)))
-	for s_ in range(len(s)):
-		for t_ in range(len(t)):
-			len_s, len_t = s_+1, t_+1
-			if(min(len_s, len_t) < n):
-				ks[s_][t_] = 0;
-			else:
-				x = s[s_] # last letter
-				j = [pos for pos, char in enumerate(t[0:t_+1]) if char == x]
-				ks[s_][t_] = ks[s_-1][t_] + sum([kprimes[n-1][s_-1][j_-1] * lambdaval**2 for j_ in j]);
+    # iterate over all length of substrings
+    for i in range(1, n):
 
-	
-	#	return k_n(s,t)
-	return ks[-1][-1];
-	
+        # iterate over every letter in s
+        for s in range(1, len(S)+1):
+
+            # iterate over every letter in t
+            for t in range(1, len(T)+1):
+
+                # if length of current substring is less than i
+                if min(s, t) < i:
+
+                    Kpp[i][s][t] = 0
+                    Kp[i][s][t] = 0
+
+                else:
+                    # if last letter in T equals last letter in S
+                    if S[s-1] == T[t-1]:
+                        Kpp[i][s][t] = lam * (Kpp[i][s][t-1] + lam * Kp[i-1][s-1][t-1])
+
+                    else:
+                        # walk through string up to t
+                        # j = all indices in t where the letter is x (the last letter in s)
+                        sum = 0
+                        for j, tj in enumerate(T[:t]):
+                            if tj == S[s-1]:
+                                sum += Kp[i-1][s-1][j] * lam ** (t - j + 1)
+
+                        Kpp[i][s][t] = sum
+
+                    Kp[i][s][t] = lam * Kp[i][s-1][t] + Kpp[i][s][t]
+
+    # Final step
+    K = np.zeros((len(S)+1, len(T)+1))
+
+    # build the final kernel backwards instead of recursively
+    for s in range(1, len(S)+1):
+
+        for t in range(1, len(T)+1):
+
+            if min(s, t) < n:
+                K[s][t] = 0
+
+            else:
+                sum = 0
+                for j, tj in enumerate(T[:t]):
+                    if tj == S[s-1]:
+                        sum += Kp[n-1][s-1][j] * lam ** 2
+
+                K[s][t] = K[s-1][t] + sum
+
+    # return the final kernel from the full strings
+    return K[-1][-1]
+
 """ Normalized version of the kernel
 s, t = strings to be compared
 n = max length of sub strings """
-def normkernel(s, t, n):
-	k1 = kernel(s,s,n)
-	k2 = kernel(t,t,n)
-	res = kernel(s,t,n) / sqrt(k1*k2)
-	return res;
+def normkernel(n, S, T):
+    print("\nstrings: ")
+    print("s = ", S)
+    print("t = ", T)
+    print("\nfirst kernel executing...")
+    k1 = kernel(S, S, n)
+    print("kernel(s, s, n) ", k1)
+    print("done")
+    print("\nsecond kernel executing...")
+    k2 = kernel(T, T, n)
+    print("kernel(t, t, n) ", k2)
+    print("done")
+    print("\nlast kernel executing...")
+    res = kernel(S, T, n) / sqrt(k1 * k2)
+    print("done. returning: ", res)
+    return res
+
 
 """ Examples to check that it's working """
 def test():
@@ -94,7 +125,4 @@ def test():
 		print(x, normkernel("science is organized knowledge", "wisdom is organized life", x), 'should be', kss[x-1])
 
 
-
 #test()
-
-
