@@ -4,7 +4,6 @@ from sklearn.svm import SVC
 from sklearn.multiclass import OneVsRestClassifier
 from sklearn.preprocessing import MultiLabelBinarizer
 from multiprocessing import Pool
-from multiprocessing.dummy import Pool as ThreadPool
 import time
 
 from preprocessing import get_classes, process_directory, data
