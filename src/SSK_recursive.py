@@ -5,7 +5,7 @@ from math import sqrt
 lam = 0.5
 
 
-def K_recursive(n, sx, t):
+def K_recursive(sx, t, n):
     """Kernel that gives the sum over all common sub sequences weighted according to their frequency and length
     sx, t = string 1, 2
     n = max length of sub strings"""
@@ -23,16 +23,16 @@ def K_recursive(n, sx, t):
     sum = 0
     for j, tj in enumerate(t):
         if tj == x:
-            sum += K_prime(n-1, s, t[0: j]) * (lam ** 2)
+            sum += K_prime(s, t[0: j], n-1) * (lam ** 2)
 
-    ret = K_recursive(n, s, t) + sum
+    ret = K_recursive(s, t, n) + sum
 
     print("K ret: ", ret)
 
     return ret
 
 
-def K_prime(i, sx, t):
+def K_prime(sx, t, i):
     """aiding function that:
     counts the length from the beginning of the the particular sequence through the end of string s and t
     instead of just counting the lengths"""
@@ -43,13 +43,13 @@ def K_prime(i, sx, t):
 
     s = sx[0: -1]
 
-    ret = lam * K_prime(i, s, t) + K_double_prime(i, sx, t)
+    ret = lam * K_prime(s, t, i) + K_double_prime(sx, t, i)
     print("K_prime ret: ", ret)
 
     return ret
 
 
-def K_double_prime(i, sx, t):
+def K_double_prime(sx, t, i):
     """function to speed up calculation of K_prime_i"""
     if min(len(sx), len(t)) < i:
         return 0
@@ -61,7 +61,7 @@ def K_double_prime(i, sx, t):
     if x == t[-1]:
         t = t[0: -1]
 
-        ret = lam * (K_double_prime(i, sx, t) + lam * K_prime(i-1, s, t))
+        ret = lam * (K_double_prime(sx, t, i) + lam * K_prime(s, t, i-1))
 
         print("K double prime ret: ", ret)
 
@@ -72,27 +72,27 @@ def K_double_prime(i, sx, t):
         sum = 0
         for j, tj in enumerate(t):
             if tj == x:
-                sum += K_prime(i-1, s, t[0: j]) * lam ** (len(t) - j + 1)
+                sum += K_prime(s, t[0: j], i-1) * lam ** (len(t) - j + 1)
 
         print("K double prime ret: ", sum)
         return sum
 
 
 
-def K_norm(n, s, t):
+def K_norm(s, t, n):
     print("\nstrings: ")
     print("s = ", s)
     print("t = ", t)
     print("\nfirst kernel executing...")
-    k1 = K_recursive(n, s, s)
+    k1 = K_recursive(s, s, n)
     print("kernel(s, s, n) ", k1)
     print("done")
     print("\nsecond kernel executing...")
-    k2 = K_recursive(n, t, t)
+    k2 = K_recursive(t, t, n)
     print("kernel(t, t, n) ", k2)
     print("done")
     print("\nlast kernel executing...")
-    res = K_recursive(n, s, t) / sqrt(k1 * k2)
+    res = K_recursive(s, t, n) / sqrt(k1 * k2)
     print("done. returning: ", res)
     return res
 
@@ -104,8 +104,8 @@ def main():
     t = "wisdom is organized life"
 
     for n in range(1, 7):
-        K = K_norm(n, s, t)
+        K = K_norm(s, t, n)
         print(n, K, 'should be', control_values[n - 1])
 
 
-# main()
+main()
