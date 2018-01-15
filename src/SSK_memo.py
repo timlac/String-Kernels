@@ -9,6 +9,7 @@ lam = 0.5  # decay factor - penalizes non-contiguous substrings, value between 0
 
 # DP method to find inner product between s and t
 def K_memo(n, S, T):
+
     if min(len(S), len(T)) < n:
         return 0
 

@@ -86,7 +86,7 @@ class GramCalc:
                     string_combinations.append([s, t])
                     coordinates.append([row, col])
 
-        pool = ThreadPool(2)
+        pool = Pool(4)
         outputs = pool.map(self.redirect_to_kernel, string_combinations)
         pool.close()
         pool.join()
