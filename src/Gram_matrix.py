@@ -17,7 +17,6 @@ class GramCalc:
     """class to hold information and calculate Gram Matrix efficiently"""
 
     stored_normalization = None
-    counter = 0
 
     def __init__(self, S, T, n, kernel, symmetric=True):
         self.n = n
@@ -85,7 +84,7 @@ class GramCalc:
                     string_combinations.append([s, t])
                     coordinates.append([row, col])
 
-        pool = Pool(4)
+        pool = Pool()
         outputs = pool.map(self.redirect_to_kernel, string_combinations)
         pool.close()
         pool.join()
@@ -198,7 +197,7 @@ def main():
 
     # build Gram matrix
     GC_train = GramCalc(train_texts, train_texts, n, kernel=kernel, symmetric=True)
-    Gram_train_matrix = GC_train.calculate(parallel=True)
+    Gram_train_matrix = GC_train.calculate(parallel=False)
     print("in main")
     print(Gram_train_matrix)
 
