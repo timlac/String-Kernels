@@ -84,7 +84,7 @@ class GramCalc:
                     string_combinations.append([s, t])
                     coordinates.append([row, col])
 
-        pool = Pool(4)
+        pool = Pool()
         outputs = pool.map(self.redirect_to_kernel, string_combinations)
         pool.close()
         pool.join()
@@ -210,8 +210,9 @@ def main():
 
     # evaluate(y_test, y_pred, mlb, filter_classes)
 def get_train_texts(n_samples):
-    train_ids, test_ids, _, texts, classes = process_file('../data/reut2-000.sgm')
-    return list(texts.values())[:n_samples]
+    _, _, _, texts, _ = process_file('../data/reut2-000.sgm')
+    texts = list(texts.values())[:n_samples]
+    texts = sorted(texts, key=len, reverse=True)
 
 
 def test(train_texts):
