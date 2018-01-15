@@ -9,7 +9,7 @@ import time
 
 from preprocessing import get_classes, process_directory, data
 from utils import *
-from SSK_memo import K_memo
+from SSK import kernel
 from tfidf import train_target
 from postprocessing import evaluate
 
@@ -99,7 +99,7 @@ class GramCalc:
             self.mat = self.symmetrize(self.mat)
 
     def redirect_to_kernel(self, sc):
-        return K_memo(self.n, sc[0], sc[1])
+        return kernel(sc[0], sc[1], self.n)
 
     def build_mat(self):
         """precompute kernel on all required combinations"""
@@ -110,7 +110,7 @@ class GramCalc:
                     pass
 
                 else:
-                    self.mat[row, col] = self.kernel(self.n, s, t)
+                    self.mat[row, col] = self.kernel(s, t, self.n)
 
         if self.symmetric:
             self.mat = self.symmetrize(self.mat)
@@ -139,7 +139,7 @@ class GramCalc:
 
         else:
             if not self.test_normalization[row]:
-                self.test_normalization[row] = K_memo(self.n, s, s)
+                self.test_normalization[row] = kernel(s, s, self.n)
 
             return self.mat[row, col] / sqrt(self.test_normalization[row] * self.train_normalization[col])
 
@@ -169,7 +169,7 @@ def main():
     # print(train_classes)
     #
     # # build Gram matrix
-    # GC_train = GramCalc(train_texts, train_texts, n, kernel=K_memo)
+    # GC_train = GramCalc(train_texts, train_texts, n, kernel=kernel)
     # Gram_train_matrix = GC_train.calculate()
     #
     # print(Gram_train_matrix)
@@ -181,7 +181,7 @@ def main():
     # print(test_texts)
     # print(test_classes)
     #
-    # GC_test = GramCalc(test_texts, train_texts, n, kernel=K_memo)
+    # GC_test = GramCalc(test_texts, train_texts, n, kernel=kernel)
     # Gram_test_matrix = GC_test.calculate()
     #
     # classifier = OneVsRestClassifier(SVC(kernel='precomputed'))
@@ -198,7 +198,7 @@ def main():
           'sensormatic electronics corp said upped investment checkrobot', 'Also you know this code is guaranteed to be much much, much slower than', 'year warrants buy 318600 restricted shares six dlrs share paralax said holders american video convertible debentures elected exchange paralax restricted']
 
     # build Gram matrix
-    GC_train = GramCalc(train_texts, train_texts, n, kernel=K_memo, symmetric=True)
+    GC_train = GramCalc(train_texts, train_texts, n, kernel=kernel, symmetric=True)
     Gram_train_matrix = GC_train.calculate(parallel=True)
     print("in main")
     print(Gram_train_matrix)
@@ -206,7 +206,7 @@ def main():
 
     # test_texts = ['qtly div nine cts vs eight cts prior pay dead may ']
     #
-    # GC_test = GramCalc(test_texts, train_texts, n, kernel=K_memo, symmetric=False)
+    # GC_test = GramCalc(test_texts, train_texts, n, kernel=kernel, symmetric=False)
     # Gram_test_matrix = GC_test.calculate()
 
 
