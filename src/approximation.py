@@ -1,5 +1,5 @@
 ####
-####		Introducing the approximated version of the kernel
+####		Approximated version of the kernel
 
 
 import numpy as np
@@ -8,11 +8,8 @@ from math import sqrt
 
 from sklearn.feature_extraction.text import CountVectorizer
 
-
 from SSK import normkernel, kernel
-from process_file import process_directory, process_file_without_modeapte
-from preprocessing import process_file
-
+from preprocessing import process_directory, process_file, preprocess_regex
 
 
 
@@ -70,12 +67,8 @@ def gram_matrix_alignment(n, S, X, Y, kerneltypes):
 
 
 """ Extracts all n-grams from a data set """
-# TODO: test this function
 def ngram_extraction(X, n):
-	pattern = '(?u)[a-z ]*' # only accept a-z and space
-	
-	# TODO: introduce some way so that only n grams including [a-z] and whitespace are included. my regex patterns seem to be overriden since they dont make any difference.
-	# could tokenize away numbers
+
 	ngram_vectorizer = CountVectorizer(analyzer='char', ngram_range=(n, n)) 
 	term_doc_matrix = ngram_vectorizer.fit_transform(X)
 	names = ngram_vectorizer.get_feature_names()
@@ -115,21 +108,18 @@ S = set of n-grams """
 def approxkernel(x, z, n, S):
 	res = 0
 	for s_i in S:
-		one = kernel(x, s_i, n)
-		two = kernel(z, s_i, n)
-		res +=  one * two;
+		xs = kernel(x, s_i, n)
+		zs = kernel(z, s_i, n)
+		res +=  xs * zs;
 	return res;
 
 """ normalized, approximated, version of the SSK kernel """
 def normapproxkernel(x, z, n, S):
-
 	xx = approxkernel(x,x,n,S)
 	zz = approxkernel(z,z,n,S)
 	xz = approxkernel(x,z,n,S)
 	norm = xz / sqrt(xx * zz);
-	
 	return norm;
-	
 
 def getData(documents, texts):
 	data = []
@@ -159,38 +149,49 @@ def test():
 	"It is based on the usage of a kernel function for measuring scalar products between data units.", 
 	"For analyzing string data Lodhi et al. (J Mach Learn Res 2:419–444, 2002) have introduced a String Subsequence kernel (SSK)"]
 	
+	X = [preprocess_regex(x) for x in X]
+	
+	term_doc_matrix, names = ngram_extraction(X, n)
+	max_ngrams = len(names);
+
 	kerneltypes = [None, 'approx']
+
+	S = form_S(X, n, max_ngrams)	#	form set of k most common n-grams in the data set	
+	for k in range(10, max_ngrams, 10):
+
+		currentS = S[0:k];
+		print(currentS, len(currentS), 'current set')
+		similarity = gram_matrix_alignment(n, currentS, X, X, kerneltypes); #	measure of similarity between gram matrix made by SSK and by approximated version of the kernel
 	
-	S = form_S(X, n, k)	#	form set of k most common n-grams in the data set
-	
-	print(S, len(S), 'the set')
-	print('building gram matrix ...')
-	GRAM1 = create_gram_matrix(n, S, X, X, kerneltype=kerneltypes[0])
-	print('building gram matrix ...')
-	print(GRAM1, 'normal SSK')
-	GRAM2 = create_gram_matrix(n, S, X, X, kerneltype=kerneltypes[1])
-	print(GRAM2, 'approximated SSK')
-	similarity = gram_matrix_alignment(n, S, X, X, kerneltypes); #	measure of similarity between gram matrix made by SSK and by approximated version of the kernel
-	
-	print('similarity between gram matrices = ', similarity)
+		print('k = ', k, 'similarity between gram matrices = ', similarity)
 
 
 ## to be continued
+## preliminary experiment
 def experiment():
 
-	train_index, texts = process_directory()
-	wholedataset = getData(train_index, texts)
-	term_doc_matrix, names = ngram_extraction(wholedataset, 3)
-	print(term_doc_matrix.shape, 'should be (21578, 8727) according to the report, however, they might have different stop words/different preprocessing and they dont seem to include numbers in their n-grams')
+	n = 5
+	num_features = 1000
+	categories = ['earn', 'acq', 'ship', 'corn']
 
-	categories = ['earn', 'acq', 'money-fx', 'grain', 'crude', 'trade', 'interest', 'ship', 'wheat', 'corn']
+	train, test, titles, texts, classes = process_directory()
+	wholedataset = getData(train, texts)
+	term_doc_matrix, names = ngram_extraction(wholedataset, n)
+	S = form_S(wholedataset, n, num_features)	# form set of k most common n-grams in the data set
+	gram = create_gram_matrix(n, S, wholedataset, wholedataset, kerneltype='approx')
+
 	
+		
+	# not sure why its not the same here. might be a preprocessing thing, 
+	# but they seem to mention that they only do removal of stopwords which wouldnt explain why i get MORE trigrams than them
+	print('num unique trigrams = ', term_doc_matrix.shape[1], 'should be 8727 according to the report')
+
 	print("## approximated SSK")
 	
 
 
-#test()
-experiment()
+test()
+#experiment()
 
 
 
