@@ -11,7 +11,7 @@ lam = 0.5  # decay factor - penalizes non-contiguous substrings, value between 0
 weighted according to their frequency and length
 s, t = strings to be compared
 n = length of substrings """
-def kernel(n, S, T):
+def kernel(S, T, n):
     if min(len(S), len(T)) < n:
         return 0
 
@@ -83,7 +83,7 @@ def kernel(n, S, T):
 """ Normalized version of the kernel
 s, t = strings to be compared
 n = max length of sub strings """
-def normkernel(n, S, T):
+def normkernel(S, T, n):
     print("\nstrings: ")
     print("s = ", S)
     print("t = ", T)
