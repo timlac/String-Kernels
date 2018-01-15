@@ -211,8 +211,8 @@ def main():
     # evaluate(y_test, y_pred, mlb, filter_classes)
 def get_train_texts(n_samples):
     _, _, _, texts, _ = process_file('../data/reut2-000.sgm')
-    texts = list(texts.values())[:n_samples]
-    texts = sorted(texts, key=len, reverse=True)
+    train_texts = list(texts.values())[:n_samples]
+    return sorted(train_texts, key=len, reverse=True)
 
 
 def test(train_texts):
