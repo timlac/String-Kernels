@@ -5,18 +5,18 @@ import numpy as np
 from math import sqrt
 
 lam = 0.5  # decay factor - penalizes non-contiguous substrings, value between 0 and 1
-""" Kernel that gives the sum over all common subsequences 
-weighted according to their frequency and length
-s, t = strings to be compared
-n = length of substrings """
 
 
 def kernel(S, T, n):
-    T = np.array(list(T))
-    S = np.array(list(S))
-
+    """ Kernel that gives the sum over all common subsequences
+    weighted according to their frequency and length
+    s, t = strings to be compared
+    n = length of substrings """
     if min(len(S), len(T)) < n:
         return 0
+
+    T = np.array(list(T))
+    S = np.array(list(S))
 
     # K prime matrix
     Kp = np.zeros((n, len(S) + 1, len(T) + 1))
@@ -42,9 +42,7 @@ def kernel(S, T, n):
                             Kpp[i][s][t - 1] + lam * Kp[i - 1][s - 1][t - 1])
 
                     else:
-                        # np version
                         tj = np.where(T[:t] == S[s - 1])[0]
-
                         Kpp[i][s][t] = np.sum(Kp[i - 1][s - 1][tj] * lam**(t - tj + 1))
 
                     Kp[i][s][t] = lam * Kp[i][s - 1][t] + Kpp[i][s][t]
@@ -59,8 +57,7 @@ def kernel(S, T, n):
 
             if min(s, t) >= n:
                 tj = np.where(T[:t] == S[s - 1])[0]
-
-                K[s][t] = K[s - 1][t] + np.sum (Kp[n - 1][s - 1][tj] * lam ** 2)
+                K[s][t] = K[s - 1][t] + np.sum(Kp[n - 1][s - 1][tj] * lam ** 2)
 
     # return the final kernel from the full strings
     return K[-1][-1]

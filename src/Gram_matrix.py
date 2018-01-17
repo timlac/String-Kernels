@@ -69,7 +69,7 @@ class GramCalc:
             self.train_normalization = self.get_stored_normalization()
 
         self.build_normalized()
-        return self.normalized_mat
+        return np.nan_to_num(self.normalized_mat, copy=False)
 
     def build_mat_parallel(self):
         mat_combos, mat_coords, norm_combos = self.generate_string_combos()
