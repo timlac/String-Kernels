@@ -241,26 +241,32 @@ def process_file(filename, category_filter=None):
                             categories.extend(topic.contents)
                     else:
                         categories.extend(topic.contents)
-                if categories:
-                    classes[document_id] = categories
-                    if document.title is None:
-                        title = ''
-                    else:
-                        title = document.title.contents[0]
+                classes[document_id] = categories
+                if document.title is None:
+                    title = ''
+                else:
+                    title = document.title.contents[0]
 
-                    titles[document_id] = title
+                titles[document_id] = title
 
-                    if document.body is None:
-                        body = ''
-                    else:
-                        body = document.body.contents[0]
+                if document.body is None:
+                    body = ''
+                else:
+                    body = document.body.contents[0]
                     text = title + ' ' + body
                     texts[document_id] = preprocess_regex(text)
 
-                    if document['lewissplit'] == 'TRAIN':
-                        train.append(document_id)
-                    else:
-                        test.append(document_id)
+                if document.body is None:
+                    body = ''
+                else:
+                    body = document.body.contents[0]
+
+                texts[document_id] = preprocess_regex(body)
+
+                if document['lewissplit'] == 'TRAIN':
+                    train.append(document_id)
+                else:
+                    test.append(document_id)
 
     return train, test, titles, texts, classes
 
