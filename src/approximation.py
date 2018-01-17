@@ -44,8 +44,6 @@ def gram_matrix_approx(n, S, X, Y):
 	
 	Gram = np.zeros((len(X), len(Y)))
 	
-	m = len(X) + len(Y);
-	
 	partial_kernels_X = np.zeros((len(X), len(S)))
 	partial_kernels_Y = np.zeros((len(Y), len(S)))
 	
@@ -57,7 +55,6 @@ def gram_matrix_approx(n, S, X, Y):
 	
 	for idx, s in enumerate(X):
 		for jdx, t in enumerate(Y):
-			Gram[idx, jdx] = np.dot(partial_kernels_X[idx], partial_kernels_Y[jdx])
 			xx = np.dot(partial_kernels_X[idx], partial_kernels_X[idx])
 			yy = np.dot(partial_kernels_Y[jdx], partial_kernels_Y[jdx])
 			xy = np.dot(partial_kernels_X[idx], partial_kernels_Y[jdx])
