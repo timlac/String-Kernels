@@ -280,7 +280,7 @@ def experiment3():
 	n = 5
 	num_features = 1000
 	categories = ['earn', 'acq', 'ship', 'corn']	
-	train_ids, test_ids, _, texts, classes = process_directory(category_filter=categories)
+	train_ids, test_ids, _, texts, classes = process_directory(class_filter=categories)
 
 	n_train_samples=len(train_ids)
 	n_test_samples=len(test_ids)
