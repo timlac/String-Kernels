@@ -116,7 +116,7 @@ class GramCalc:
 
         # sort according to longest string
         zipped = zip(mat_combos, mat_coords)
-        zipped_sorted = sorted(zipped, key=lambda x: len(x[0][0]) + len(x[0][1]), reverse=True)
+        zipped_sorted = sorted(zipped, key=lambda x: len(x[0][0]) * len(x[0][1]), reverse=True)
         separated = list(zip(*zipped_sorted))
         mat_combos = list(separated[0])
         mat_coords = list(separated[1])
