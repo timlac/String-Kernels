@@ -12,6 +12,7 @@ def kernel(S, T, n):
     weighted according to their frequency and length
     s, t = strings to be compared
     n = length of substrings """
+
     if min(len(S), len(T)) < n:
         return 0
 
