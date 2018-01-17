@@ -10,6 +10,7 @@ import time
 from preprocessing import get_classes, process_directory, data, process_file
 from utils import *
 from SSK import kernel
+from storage_SSK import KernelOperations
 from tfidf import train_target
 from postprocessing import evaluate
 
@@ -19,22 +20,21 @@ class GramCalc:
 
     stored_normalization = None
 
-    def __init__(self, S, T, n, kernel, symmetric=True):
-        self.n = n
-        self.kernel = kernel
-
+    def __init__(self, S, T, N, kernel, symmetric=True, store_mode = False):
         self.S = S
         self.T = T
 
-        self.mat = np.zeros((len(S), len(T)))
-        self.normalized_mat = np.zeros((len(S), len(T)))
+        self.N = N
+        self.kernel = kernel
 
-        self.train_normalization = np.zeros(len(S))
-        self.test_normalization = np.zeros(len(S))
+        self.mat = np.zeros((N, len(S), len(T)))
+        self.normalized_mat = np.zeros((N, len(S), len(T)))
+
+        self.train_normalization = np.zeros((N, len(S)))
+        self.test_normalization = np.zeros((N, len(S)))
 
         self.symmetric = symmetric
-
-        self.counter = 0
+        self.store_mode = store_mode
 
     @classmethod
     def store_normalization_vars(cls, vars):
@@ -73,33 +73,6 @@ class GramCalc:
         self.build_normalized()
         return np.nan_to_num(self.normalized_mat, copy=False)
 
-    def build_mat_parallel(self):
-        mat_combos, mat_coords = self.generate_string_combos()
-
-        for i,j in mat_combos:
-            print(str(len(i)) + " " + str(len(j)))
-
-        outputs = self.parallelize(mat_combos)
-
-        for i in range(len(mat_combos)):
-            c = mat_coords[i]
-            # assymetric case
-            # normalization values are stored in negative index
-            if c[1] < 0:
-                self.test_normalization[c[0]] = outputs[i]
-            else:
-                self.mat[c[0], c[1]] = outputs[i]
-
-        if self.symmetric:
-            self.mat = self.symmetrize(self.mat)
-
-    def parallelize(self, string_vector):
-        pool = Pool(cpu_count())
-        outputs = pool.map(self.redirect_to_kernel, string_vector, chunksize=1)
-        pool.close()
-        pool.join()
-        return outputs
-
     def generate_string_combos(self):
         """generate all string combinations required to build gram matrix
         as well as all norm combos"""
@@ -129,13 +102,38 @@ class GramCalc:
 
         return mat_combos, mat_coords
 
+
+    def build_mat_parallel(self):
+        mat_combos, mat_coords = self.generate_string_combos()
+
+        outputs = self.parallelize(mat_combos)
+
+        for i in range(len(mat_combos)):
+            for n in range(self.N):
+                c = mat_coords[i]
+
+                # assymetric case
+                # normalization values are stored in negative index
+                if c[1] < 0:
+                    self.test_normalization[n, c[0]] = outputs[i][n-2]
+
+                else:
+                    self.mat[n, c[0], c[1]] = outputs[i][n-2]
+
+        if self.symmetric:
+            for n in range(self.N):
+                self.mat[n] = self.symmetrize(self.mat[n])
+
+    def parallelize(self, string_vector):
+        pool = Pool(cpu_count())
+        outputs = pool.map(self.redirect_to_kernel, string_vector, chunksize=1)
+        pool.close()
+        pool.join()
+        return outputs
+
     def redirect_to_kernel(self, sc):
-        start = time.time()
-        print("starting... doc 1: " + str(len(sc[0])) + ", doc 2: " + str(len(sc[1])))
-        ret = kernel(sc[0], sc[1], self.n)
-        stop = time.time()
-        self.counter += 1
-        print(str(self.counter) + "done, time: " + str(stop-start) + " doc 1: " + str(len(sc[0])) + ", doc 2: " + str(len(sc[1])))
+        ko = KernelOperations(sc[0], sc[1], self.N)
+        ret = ko.run_all_kernels()
         return ret
 
     def build_mat(self):
@@ -147,38 +145,40 @@ class GramCalc:
                     pass
 
                 else:
-                    self.mat[row, col] = self.kernel(s, t, self.n)
+                    self.mat[row, col] = self.kernel(s, t, self.N)
 
         if self.symmetric:
             self.mat = self.symmetrize(self.mat)
         else:
             for idx, s in enumerate(self.S):
-                self.test_normalization[idx] = self.kernel(s, s, self.n)
+                self.test_normalization[idx] = self.kernel(s, s, self.N)
 
     def build_normalized(self):
         """build normalized gram matrix from precomputed kernel values"""
-        for row, s in enumerate(self.S):
-            for col, t in enumerate(self.T):
+        for n in range(self.N):
+            for row, s in enumerate(self.S):
+                for col, t in enumerate(self.T):
 
-                if self.symmetric and row > col:
-                    pass
+                    if self.symmetric and row > col:
+                        pass
 
-                elif self.symmetric and row == col:
-                    self.normalized_mat[row, col] = 1
+                    elif self.symmetric and row == col:
+                        self.normalized_mat[n, row, col] = 1
 
-                else:
-                    self.normalized_mat[row, col] = self.normalize(row, col)
+                    else:
+                        self.normalized_mat[n, row, col] = self.normalize(n, row, col)
 
-        if self.symmetric:
-            self.normalized_mat = self.symmetrize(self.normalized_mat)
+            if self.symmetric:
+                for n in range(self.N):
+                    self.normalized_mat[n] = self.symmetrize(self.normalized_mat[n])
 
-    def normalize(self, row, col):
+    def normalize(self, n, row, col):
         """normalize gram matrix element"""
         if self.symmetric:
-            return self.mat[row, col] / sqrt(self.train_normalization[row] * self.train_normalization[col])
+            return self.mat[n, row, col] / sqrt(self.train_normalization[n, row] * self.train_normalization[n, col])
 
         else:
-            return self.mat[row, col] / sqrt(self.test_normalization[row] * self.train_normalization[col])
+            return self.mat[n, row, col] / sqrt(self.test_normalization[n, row] * self.train_normalization[n, col])
 
     @staticmethod
     def symmetrize(matrix):
@@ -228,14 +228,14 @@ def main():
     # print(y_pred)
     # print(mlb.inverse_transform(y_pred))
 
-    n = 3
+    n = 4
 
     # train_texts = ["re", 'oo']
 
-    train_texts =  ['grain reserve holdings breakdown us agriculture department gave following breakdown grain remaining farmerowned grain reserve april mln bushels reserve number ii iii iv v vi wheat nil nil corn sorghumx barley x mln cwts note usda says totals may match total reserve numbers reuter',
-                   'brazil coffee exports disrupted strike dayold strike brazilian seamen affecting coffee shipments could lead short term supply squeeze abroad exporters said could quantify much coffee delayed said least pct coffee exports carried brazilian ships movement foreign vessels also disrupted port congestion caused '
-                   'us grain analysts see lower corn soy planting grain analysts surveyed american soybean association asa projected acreage year mln acres soybeans mln acres corn farmers planted mln acres soybeans mln acres corn according february usda supplydemand report usda release planting intentions report march survey included soybean estimates corn estimates ',
-                   'union shippers agree cut ny port costs new york shipping association international longshoremens association said agreed cut cargo assessments port new york new jersey pct labor intensive cargos charges cargo handled union workers reduced dlrs ton dlrs ton effective april one according agreement union shippers assessments ',
+    train_texts =  ['grain reserve holdings breakdown us agriculture department ',
+                   'brazil coffee exports disrupted strike dayold strike brazilian seamen affecting coffee'
+                   'us grain analysts see lower corn soy planting grain analysts surveyed american',
+                   'union shippers agree cut ny port costs new york ',
                    'grain certificate redemptions ']
                    # 'us exporters report tonnes corn switched unknown ussr'
                    # 'midwest cash grain slow country movement cash grain dealers reported slow country movement corn ',
@@ -245,8 +245,11 @@ def main():
     GC_train = GramCalc(train_texts, train_texts, n, kernel=kernel, symmetric=True)
     Gram_train_matrix = GC_train.calculate(parallel=True)
     print("in main")
-    print("Gram train matrix", Gram_train_matrix)
+    print("Gram train matrix")
+    for i in Gram_train_matrix:
+        print(i)
 
+    print("done")
 
     test_texts = ['grain certificate redemptions put mln']
 

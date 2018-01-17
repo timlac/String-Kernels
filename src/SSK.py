@@ -4,9 +4,6 @@
 import numpy as np
 from math import sqrt
 
-lam = 0.5  # decay factor - penalizes non-contiguous substrings, value between 0 and 1
-
-
 def kernel(S, T, n):
     """ Kernel that gives the sum over all common subsequences
     weighted according to their frequency and length
@@ -18,6 +15,8 @@ def kernel(S, T, n):
 
     T = np.array(list(T))
     S = np.array(list(S))
+
+    lam = 0.5  # decay factor - penalizes non-contiguous substrings, value between 0 and 1
 
     # K prime matrix
     Kp = np.zeros((n, len(S) + 1, len(T) + 1))
@@ -89,39 +88,53 @@ def normkernel(S, T, n):
 def test():
     """ Examples to check that it's working """
 
-    print('k(car, car, 1) = ', kernel('car', 'car', 1),
-          'should be 3*lambda^2 = .75')
-    print('k(car, car, 2) = ', kernel('car', 'car', 2),
-          ' should be lambda^6 + 2*lambda^4 = 0.140625')
-    print('k(car, car, 3) = ', kernel('car', 'car', 3),
-          'should be lambda^6 = 0.0156')
+    S = "cells interlinked within cells interlinked"
+    T = "within one stem and dreadfully distinct"
 
-    print('normkernel(cat, car, 1) = ', normkernel('cat', 'car', 1),
-          'should be 2/3')
-    print('kernel(cat, car, 2) = ', kernel('cat', 'car', 2),
-          'should be lambda^4 = 0.0625')
-    print('normkernel(cat, car, 2) = ', normkernel('cat', 'car', 2),
-          'should be 1/(2+lambda^2) = 0.44444')
+    n = 2
 
-    print(
-        kernel("AxxxxxxxxxB", "AyB", 2),
-        'should be =0.5^14 = 0.00006103515625')
-    print(
-        kernel("AxxxxxxxxxB", "AxxxxxxxxxB", 2),
-        'should be 12.761724710464478')
+    res = kernel(S, T, n)
 
-    print(kernel("ab", "axb", 2), 'should be =0.5^5 = 0.03125')
-    print(kernel("ab", "abb", 2), 'should be 0.5^5 + 0.5^4 = 0.09375')
-    print(normkernel("ab", "ab", 2), 'should be 1')
-    print(normkernel("AxxxxxxxxxB", "AxxxxxxxxxB", 2), 'should be 1')
+    print(res)
 
-    kss = [0.580, 0.580, 0.478, 0.439, 0.406, 0.370]
-    for x in range(1, 7):
-        print(x,
-              normkernel("science is organized knowledge",
-                         "wisdom is organized life", x), 'should be',
-              kss[x - 1])
 
+
+
+
+
+    # print('k(car, car, 1) = ', kernel('car', 'car', 1),
+    #       'should be 3*lambda^2 = .75')
+    # print('k(car, car, 2) = ', kernel('car', 'car', 2),
+    #       ' should be lambda^6 + 2*lambda^4 = 0.140625')
+    # print('k(car, car, 3) = ', kernel('car', 'car', 3),
+    #       'should be lambda^6 = 0.0156')
+    #
+    # print('normkernel(cat, car, 1) = ', normkernel('cat', 'car', 1),
+    #       'should be 2/3')
+    # print('kernel(cat, car, 2) = ', kernel('cat', 'car', 2),
+    #       'should be lambda^4 = 0.0625')
+    # print('normkernel(cat, car, 2) = ', normkernel('cat', 'car', 2),
+    #       'should be 1/(2+lambda^2) = 0.44444')
+    #
+    # print(
+    #     kernel("AxxxxxxxxxB", "AyB", 2),
+    #     'should be =0.5^14 = 0.00006103515625')
+    # print(
+    #     kernel("AxxxxxxxxxB", "AxxxxxxxxxB", 2),
+    #     'should be 12.761724710464478')
+    #
+    # print(kernel("ab", "axb", 2), 'should be =0.5^5 = 0.03125')
+    # print(kernel("ab", "abb", 2), 'should be 0.5^5 + 0.5^4 = 0.09375')
+    # print(normkernel("ab", "ab", 2), 'should be 1')
+    # print(normkernel("AxxxxxxxxxB", "AxxxxxxxxxB", 2), 'should be 1')
+    #
+    # kss = [0.580, 0.580, 0.478, 0.439, 0.406, 0.370]
+    # for x in range(1, 7):
+    #     print(x,
+    #           normkernel("science is organized knowledge",
+    #                      "wisdom is organized life", x), 'should be',
+    #           kss[x - 1])
+    #
 
 if __name__ == '__main__':
     test()

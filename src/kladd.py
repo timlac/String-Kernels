@@ -34,23 +34,31 @@
 # # print(lst)
 #
 # # print(lst[3:])
-
+#
+# import numpy as np
+#
+# T = "hej jag heter tim"
+#
+# T = np.array(list(T))
+#
+#
+# tj = np.where(T == "j")[0]
+#
+# # tj = tj.astype(int)
+#
+# print(tj)
+#
+# for i in tj:
+#     print(i)
+#
+# g = np.chararray(list(T))
+#
+# print(g)
 import numpy as np
 
-T = "hej jag heter tim"
+S = "hej"
+N = 4
 
-T = np.array(list(T))
+train_normalization = np.zeros((N, len(S)))
 
-
-tj = np.where(T == "j")[0]
-
-# tj = tj.astype(int)
-
-print(tj)
-
-for i in tj:
-    print(i)
-
-g = np.chararray(list(T))
-
-print(g)
+print(train_normalization)
