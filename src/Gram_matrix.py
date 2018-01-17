@@ -10,7 +10,6 @@ import time
 from preprocessing import get_classes, process_directory, data, process_file
 from utils import *
 from SSK import kernel
-from SSK_backup_onsdag import kernel as K_a
 from tfidf import train_target
 from postprocessing import evaluate
 
