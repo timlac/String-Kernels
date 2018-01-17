@@ -132,7 +132,7 @@ class GramCalc:
         ret = kernel(sc[0], sc[1], self.n)
         stop = time.time()
         self.counter += 1
-        print(str(self.counter) + ", time: " + str(start-stop) + " doc 1: " + str(len(sc[0])) + ", doc 2: " + str(len(sc[0])))
+        print(str(self.counter) + ", time: " + str(stop-start) + " doc 1: " + str(len(sc[0])) + ", doc 2: " + str(len(sc[1])))
         return ret
 
     def build_mat(self):
