@@ -228,14 +228,14 @@ def main():
     # print(y_pred)
     # print(mlb.inverse_transform(y_pred))
 
-    n = 3
+    n = 2
 
     # train_texts = ["re", 'oo']
 
-    train_texts =  ['grain reserve holdings breakdown us agriculture department gave following breakdown grain remaining farmerowned grain reserve april mln bushels reserve number ii iii iv v vi wheat nil nil corn sorghumx barley x mln cwts note usda says totals may match total reserve numbers reuter',
-                   'brazil coffee exports disrupted strike dayold strike brazilian seamen affecting coffee shipments could lead short term supply squeeze abroad exporters said could quantify much coffee delayed said least pct coffee exports carried brazilian ships movement foreign vessels also disrupted port congestion caused '
-                   'us grain analysts see lower corn soy planting grain analysts surveyed american soybean association asa projected acreage year mln acres soybeans mln acres corn farmers planted mln acres soybeans mln acres corn according february usda supplydemand report usda release planting intentions report march survey included soybean estimates corn estimates ',
-                   'union shippers agree cut ny port costs new york shipping association international longshoremens association said agreed cut cargo assessments port new york new jersey pct labor intensive cargos charges cargo handled union workers reduced dlrs ton dlrs ton effective april one according agreement union shippers assessments ',
+    train_texts =  ['grain reserve holdings breakdown us agriculture department ',
+                   'brazil coffee exports disrupted strike dayold strike brazilian seamen affecting coffee'
+                   'us grain analysts see lower corn soy planting grain analysts surveyed american',
+                   'union shippers agree cut ny port costs new york ',
                    'grain certificate redemptions ']
                    # 'us exporters report tonnes corn switched unknown ussr'
                    # 'midwest cash grain slow country movement cash grain dealers reported slow country movement corn ',

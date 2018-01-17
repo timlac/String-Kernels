@@ -91,7 +91,7 @@ def test():
     S = "cells interlinked within cells interlinked"
     T = "within one stem and dreadfully distinct"
 
-    n = 2
+    n = 1
 
     res = kernel(S, T, n)
 

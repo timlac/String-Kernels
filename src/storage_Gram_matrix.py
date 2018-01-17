@@ -20,29 +20,28 @@ class GramCalc:
 
     stored_normalization = None
 
-    def __init__(self, S, T, N, kernel, symmetric=True, store_mode = False):
+    def __init__(self, S, T, N, kernel, symmetric=True):
         self.S = S
         self.T = T
 
-        self.N = N
+        self.N = N+1
         self.kernel = kernel
 
-        self.mat = np.zeros((N, len(S), len(T)))
-        self.normalized_mat = np.zeros((N, len(S), len(T)))
+        self.mat = np.zeros((self.N, len(S), len(T)))
+        self.normalized_mat = np.zeros((self.N, len(S), len(T)))
 
-        self.train_normalization = np.zeros((N, len(S)))
-        self.test_normalization = np.zeros((N, len(S)))
+        self.train_normalization = np.zeros((self.N, len(S)))
+        self.test_normalization = np.zeros((self.N, len(S)))
 
         self.symmetric = symmetric
-        self.store_mode = store_mode
 
     @classmethod
     def store_normalization_vars(cls, vars):
         """store computed normalization values"""
         cls.stored_normalization = vars
 
-    def get_stored_normalization(cls):
-        return cls.stored_normalization
+    def get_stored_normalization(self):
+        return self.stored_normalization
 
     def calculate(self, parallel=True):
         """perform all calculations"""
@@ -53,20 +52,16 @@ class GramCalc:
             self.build_mat_parallel()
             end = time.time()
             print("\ndone with matrix")
-            print(self.mat)
-            print('\nelapsed time: ', end - start)
-        else:
-            print("building matrix regular")
-            start = time.time()
-            self.build_mat()
-            end = time.time()
-            print("\ndone with matrix")
-            print(self.mat)
+            for i in self.mat:
+                print("i: ", i)
+                print()
             print('\nelapsed time: ', end - start)
 
         if self.symmetric:
-            self.train_normalization = self.mat.diagonal()
+            for n in range(self.N):
+                self.train_normalization[n] = self.mat[n].diagonal()
             self.store_normalization_vars(self.train_normalization)
+
         else:
             self.train_normalization = self.get_stored_normalization()
 
@@ -102,23 +97,30 @@ class GramCalc:
 
         return mat_combos, mat_coords
 
-
     def build_mat_parallel(self):
         mat_combos, mat_coords = self.generate_string_combos()
 
         outputs = self.parallelize(mat_combos)
 
+        print("outputs: ")
+        for i in outputs:
+            print(i[2])
+        print("outputs: ", len(outputs[1]))
+        print("N ", self.N)
+
         for i in range(len(mat_combos)):
             for n in range(self.N):
+                print("n ", n )
+
                 c = mat_coords[i]
 
                 # assymetric case
                 # normalization values are stored in negative index
                 if c[1] < 0:
-                    self.test_normalization[n, c[0]] = outputs[i][n-2]
+                    self.test_normalization[n, c[0]] = outputs[i][n]
 
                 else:
-                    self.mat[n, c[0], c[1]] = outputs[i][n-2]
+                    self.mat[n, c[0], c[1]] = outputs[i][n]
 
         if self.symmetric:
             for n in range(self.N):
@@ -136,23 +138,6 @@ class GramCalc:
         ret = ko.run_all_kernels()
         return ret
 
-    def build_mat(self):
-        """precompute kernel on all required combinations"""
-        for row, s in enumerate(self.S):
-            for col, t in enumerate(self.T):
-
-                if self.symmetric and row > col:
-                    pass
-
-                else:
-                    self.mat[row, col] = self.kernel(s, t, self.N)
-
-        if self.symmetric:
-            self.mat = self.symmetrize(self.mat)
-        else:
-            for idx, s in enumerate(self.S):
-                self.test_normalization[idx] = self.kernel(s, s, self.N)
-
     def build_normalized(self):
         """build normalized gram matrix from precomputed kernel values"""
         for n in range(self.N):
@@ -168,9 +153,9 @@ class GramCalc:
                     else:
                         self.normalized_mat[n, row, col] = self.normalize(n, row, col)
 
-            if self.symmetric:
-                for n in range(self.N):
-                    self.normalized_mat[n] = self.symmetrize(self.normalized_mat[n])
+        if self.symmetric:
+            for n in range(self.N):
+                self.normalized_mat[n] = self.symmetrize(self.normalized_mat[n])
 
     def normalize(self, n, row, col):
         """normalize gram matrix element"""
@@ -228,7 +213,7 @@ def main():
     # print(y_pred)
     # print(mlb.inverse_transform(y_pred))
 
-    n = 4
+    n = 2
 
     # train_texts = ["re", 'oo']
 
@@ -248,14 +233,20 @@ def main():
     print("Gram train matrix")
     for i in Gram_train_matrix:
         print(i)
+        print()
 
-    print("done")
+    print("\n")
 
     test_texts = ['grain certificate redemptions put mln']
 
     GC_test = GramCalc(test_texts, train_texts, n, kernel=kernel, symmetric=False)
     Gram_test_matrix = GC_test.calculate(parallel=True)
-    print("Gram test matrix", Gram_test_matrix)
+
+    print("Gram test matrix")
+    for i in Gram_test_matrix:
+        print(i)
+        print()
+
 
     # evaluate(y_test, y_pred, mlb, filter_classes)
 def get_train_texts(n_samples):

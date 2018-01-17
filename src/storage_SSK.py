@@ -14,11 +14,9 @@ class KernelOperations:
         self.abs_S = len(S) + 1
         self.abs_T = len(T) + 1
 
-        # K matrix
-        self.K = np.zeros((self.abs_S, self.abs_T))
-
         # K prime matrix
         self.Kp = np.zeros((N, self.abs_S, self.abs_T))
+        self.Kp[0, :, :] = 1
 
         # K double prime matrix
         self.Kpp = np.zeros((N, self.abs_S, self.abs_T))
@@ -30,12 +28,17 @@ class KernelOperations:
         self.kernel_values = []
 
     def run_all_kernels(self):
-        for n in range(2, self.N):
-            res = self.kernel(n-1, n)
+        for n in range(self.N):
+            res = self.kernel(n)
             self.kernel_values.append(res)
         return self.kernel_values
 
-    def kernel(self, start, n):
+    def kernel(self, n):
+        self.build_layer(n)
+        val = self.get_kernel(n)
+        return val
+
+    def build_layer(self, n):
         """ Kernel that gives the sum over all common subsequences
         weighted according to their frequency and length
         s, t = strings to be compared
@@ -43,10 +46,8 @@ class KernelOperations:
         if min(len(self.S), len(self.T)) < n:
             return 0
 
-        self.Kp[0, :, :] = 1
-
         # iterate over all length of substrings
-        for i in range(start, n):
+        for i in range(1, n):
 
             # iterate over every letter in s
             for s in range(1, self.abs_S):
@@ -66,21 +67,25 @@ class KernelOperations:
 
                         self.Kp[i][s][t] = self.lam * self.Kp[i][s - 1][t] + self.Kpp[i][s][t]
 
+    def get_kernel(self, n):
+        # K matrix
+        K = np.zeros((self.abs_S, self.abs_T))
+
         # build the final kernel backwards instead of recursively
         for s in range(1, self.abs_S):
             for t in range(1, self.abs_T):
 
                 if min(s, t) >= n:
                     tj = np.where(self.T[:t] == self.S[s - 1])[0]
-                    self.K[s][t] = self.K[s - 1][t] + np.sum(self.Kp[n - 1][s - 1][tj] * self.lam ** 2)
+                    K[s][t] = K[s - 1][t] + np.sum(self.Kp[n - 1][s - 1][tj] * self.lam ** 2)
 
         # return the final kernel from the full strings
-        return self.K[-1][-1]
+        return K[-1][-1]
 
 def main():
     S = "cells interlinked within cells interlinked"
     T = "within one stem and dreadfully distinct"
-    N = 5
+    N = 6
 
     ko = KernelOperations(S, T, N)
 
