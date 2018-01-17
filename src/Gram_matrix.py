@@ -97,7 +97,7 @@ class GramCalc:
 
     def parallelize(self, string_vector):
         pool = Pool(cpu_count())
-        outputs = pool.map(self.redirect_to_kernel, string_vector)
+        outputs = pool.map(self.redirect_to_kernel, string_vector, chunksize=1)
         pool.close()
         pool.join()
         return outputs
