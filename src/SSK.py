@@ -1,5 +1,5 @@
-#	String Subsequence kernel - similarity measure between two strings based on contiguous and non-contiguous substrings
-#	uses dynamic programming algorithm for better performance
+# String Subsequence kernel - similarity measure between two strings based on contiguous and non-contiguous substrings
+# uses dynamic programming algorithm for better performance
 
 import numpy as np
 from math import sqrt
@@ -12,6 +12,9 @@ n = length of substrings """
 
 
 def kernel(S, T, n):
+    T = np.array(list(T))
+    S = np.array(list(S))
+
     if min(len(S), len(T)) < n:
         return 0
 
@@ -21,11 +24,7 @@ def kernel(S, T, n):
     # K double prime matrix
     Kpp = np.zeros((n, len(S) + 1, len(T) + 1))
 
-    # 1st row
-#    for s in range(len(S) + 1):
-#        for t in range(len(T) + 1):
-#            Kp[0][s][t] = 1
-    Kp[0,:,:] = 1
+    Kp[0, :, :] = 1
 
     # iterate over all length of substrings
     for i in range(1, n):
@@ -36,13 +35,6 @@ def kernel(S, T, n):
             # iterate over every letter in t
             for t in range(1, len(T) + 1):
 
-                # if length of current substring is less than i
-#                if min(s, t) < i:
-
-#                    Kpp[i][s][t] = 0
-#                    Kp[i][s][t] = 0
-
-#                else:
                 if min(s, t) >= i:
                     # if last letter in T equals last letter in S
                     if S[s - 1] == T[t - 1]:
@@ -50,14 +42,10 @@ def kernel(S, T, n):
                             Kpp[i][s][t - 1] + lam * Kp[i - 1][s - 1][t - 1])
 
                     else:
-                        # walk through string up to t
-                        # j = all indices in t where the letter is x (the last letter in s)
-                        sum = 0
-                        for j, tj in enumerate(T[:t]):
-                            if tj == S[s - 1]:
-                                sum += Kp[i - 1][s - 1][j] * lam**(t - j + 1)
+                        # np version
+                        tj = np.where(T[:t] == S[s - 1])[0]
 
-                        Kpp[i][s][t] = sum
+                        Kpp[i][s][t] = np.sum(Kp[i - 1][s - 1][tj] * lam**(t - tj + 1))
 
                     Kp[i][s][t] = lam * Kp[i][s - 1][t] + Kpp[i][s][t]
 
@@ -65,32 +53,24 @@ def kernel(S, T, n):
     K = np.zeros((len(S) + 1, len(T) + 1))
 
     # build the final kernel backwards instead of recursively
+    # np version
     for s in range(1, len(S) + 1):
-
         for t in range(1, len(T) + 1):
-#
-#            if min(s, t) < n:
-#                K[s][t] = 0
-#
-#            else:
-            if min(s, t) >= n:
-                sum = 0
-                for j, tj in enumerate(T[:t]):
-                    if tj == S[s - 1]:
-                        sum += Kp[n - 1][s - 1][j] * lam**2
 
-                K[s][t] = K[s - 1][t] + sum
+            if min(s, t) >= n:
+                tj = np.where(T[:t] == S[s - 1])[0]
+
+                K[s][t] = K[s - 1][t] + np.sum (Kp[n - 1][s - 1][tj] * lam ** 2)
 
     # return the final kernel from the full strings
     return K[-1][-1]
 
 
-""" Normalized version of the kernel
-s, t = strings to be compared
-n = max length of sub strings """
-
-
 def normkernel(S, T, n):
+    """ Normalized version of the kernel
+    s, t = strings to be compared
+    n = max length of sub strings """
+
     print("\nstrings: ")
     print("s = ", S)
     print("t = ", T)
@@ -108,10 +88,8 @@ def normkernel(S, T, n):
     return res
 
 
-""" Examples to check that it's working """
-
-
 def test():
+    """ Examples to check that it's working """
 
     print('k(car, car, 1) = ', kernel('car', 'car', 1),
           'should be 3*lambda^2 = .75')

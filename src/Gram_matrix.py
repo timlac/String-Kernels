@@ -10,6 +10,7 @@ import time
 from preprocessing import get_classes, process_directory, data, process_file
 from utils import *
 from SSK import kernel
+from SSK_backup_onsdag import kernel as K_a
 from tfidf import train_target
 from postprocessing import evaluate
 
@@ -223,29 +224,30 @@ def main():
 
     n = 2
 
-    train_texts = ['us export inspections thous bushels soybeans wheat corn',
-                   'grain reserve holdings breakdown us agriculture department gave following breakdown grain remaining farmerowned grain reserve april mln bushels reserve number ii iii iv v vi wheat nil nil corn sorghumx barley x mln cwts note usda says totals may match total reserve numbers reuter',
-                   'us exporters report tonnes corn sold ussr',
+    # train_texts = ["'us export inspections thous bushels soybeans wheat corn'", 'us exporters report tonnes corn sold ussr']
+
+    train_texts =  ['grain reserve holdings breakdown us agriculture department gave following breakdown grain remaining farmerowned grain reserve april mln bushels reserve number ii iii iv v vi wheat nil nil corn sorghumx barley x mln cwts note usda says totals may match total reserve numbers reuter',
+                   # 'us exporters report tonnes corn sold ussr',
                    #'brazil coffee exports disrupted strike dayold strike brazilian seamen affecting coffee shipments could lead short term supply squeeze abroad exporters said could quantify much coffee delayed said least pct coffee exports carried brazilian ships movement foreign vessels also disrupted port congestion caused strike series labor disputes bad weather meant brazils coffee exports running average two weeks behind schedule since start year one source added end february shipments fallen bags behind registrations leaving around mln bags shipped march march bags shipped sources said given brazils port loading capacity around bags day even normal operations resumed immediately interrupted bad weather march registered coffee inevitably shipped april added reuter']
                    # 'us grain analysts see lower corn soy planting grain analysts surveyed american soybean association asa projected acreage year mln acres soybeans mln acres corn farmers planted mln acres soybeans mln acres corn according february usda supplydemand report usda release planting intentions report march survey included soybean estimates corn estimates released march soybean update newsletter sent members estimates ranged mln mln acres soybeans mln mln acres corn asa spokesman said association plans survey farmers planting intentions year reuter',
                    # 'union shippers agree cut ny port costs new york shipping association international longshoremens association said agreed cut cargo assessments port new york new jersey pct labor intensive cargos charges cargo handled union workers reduced dlrs ton dlrs ton effective april one according agreement union shippers assessments used fund workers benefits lowering price get bulk cargo flowing spokesman new york shipping association said',
-                   'grain certificate redemptions put mln bu mln bushels government grain allocated redemptions commodity certificates since program began april according commodity credit corporation redemptions included mln bushels corn valued mln dlrs average perbushel price dlrs since current grain catalogs issued december ccc wheat redemptions totaled mln bushels valued mln dlrs since december',
-                   'us exporters report tonnes corn switched unknown ussr']
+                   'grain certificate redemptions put mln bu mln bushels government grain allocated redemptions commodity certificates since program began april according commodity credit corporation redemptions included mln bushels corn valued mln dlrs average perbushel price dlrs since current grain catalogs issued december ccc wheat redemptions totaled mln bushels valued mln dlrs since december']
+                   # 'us exporters report tonnes corn switched unknown ussr']
                    # 'midwest cash grain slow country movement cash grain dealers reported slow country movement corn soybeans across midwest even corn sales pikandroll activity seen earlier week drying dealers said usda may adjust posted county price gulf take account high barge freight rates way keep corn sales flowing added current plan probably given weeks see work hoped corn soybean basis values continued drop illinois midmississippi river due strong barge freight rates toledo chicago elevators finishing loading first corn boats new shipping season supporting spot basis values terminal points corn soybeans toledo und may unc und may unc cincinnati und may unc ovr may new und may unc und may dn ne indiana und may unc ovr may dn chicago ovr may unc und may unc seneca und may dn und may unc davenport und may dn und may dn clinton und may dn ua cedar rapids und may dn und may dn hrw wheat toledo lb ovr may chicago lb ovr may unc cincinnati dp ovr may unc ne indiana dp ovr may unc pik certificates pct unc dn nc comparison ua unavailable unc unchanged dp delayed pricing reuter',
                    # 'brazil seamen continue strike despite court hundreds marines alert key brazilian ports seamen decided remain indefinite strike even higher labour court saturday ruled illegal union leaders said halt first national strike seamen years started february union leaders said would return work unless got pct pay rise shipowners offered per cent raise seamen rejected nothing lose want lay workers fine determined carry protest end union leader said said decided meeting marines take ships seamen would abandon vessels let marines handle situation spokesman rio de janeiro port said order send marines take ports given navy minister henrique saboya grounds ports areas national security said incidents strike cut exports imports made estimated ships idle petrol station owners four states also continued shutdown fears combination two stoppages could lead serious fuel shortage reuter']
 
     # build Gram matrix
     GC_train = GramCalc(train_texts, train_texts, n, kernel=kernel, symmetric=True)
-    Gram_train_matrix = GC_train.calculate(parallel=True)
+    Gram_train_matrix = GC_train.calculate(parallel=False)
     print("in main")
-    print(Gram_train_matrix)
+    print("Gram train matrix", Gram_train_matrix)
 
 
-    test_texts = ['my name is tim and i live on a farm outnorth ']
+    test_texts = ['grain certificate redemptions put mln']
 
     GC_test = GramCalc(test_texts, train_texts, n, kernel=kernel, symmetric=False)
-    Gram_test_matrix = GC_test.calculate(parallel=True)
-    print(Gram_test_matrix)
+    Gram_test_matrix = GC_test.calculate(parallel=False)
+    print("Gram test matrix", Gram_test_matrix)
 
     # evaluate(y_test, y_pred, mlb, filter_classes)
 def get_train_texts(n_samples):
