@@ -129,10 +129,10 @@ class GramCalc:
 
     def redirect_to_kernel(self, sc):
         start = time.time()
-        ret = kernel(len(sc[0]), len(sc[1]), self.n)
+        ret = kernel(sc[0], sc[1], self.n)
         stop = time.time()
         self.counter += 1
-        print(str(self.counter) + ", time: " + str(start-stop) + " doc 1: " + str(sc[0]) + ", doc 2: " + str(sc[0]))
+        print(str(self.counter) + ", time: " + str(start-stop) + " doc 1: " + str(len(sc[0])) + ", doc 2: " + str(len(sc[0])))
         return ret
 
     def build_mat(self):
