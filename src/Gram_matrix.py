@@ -34,6 +34,8 @@ class GramCalc:
 
         self.symmetric = symmetric
 
+        self.counter = 0
+
     @classmethod
     def store_normalization_vars(cls, vars):
         """store computed normalization values"""
@@ -126,8 +128,11 @@ class GramCalc:
         return mat_combos, mat_coords, norm_combos
 
     def redirect_to_kernel(self, sc):
+        start = time.time()
         ret = kernel(sc[0], sc[1], self.n)
-        print(ret)
+        stop = time.time()
+        self.counter += 1
+        print(str(self.counter) + ", time: " + str(start-stop) + " doc 1: " + str(sc[0]) + ", doc 2: " + str(sc[0]))
         return ret
 
     def build_mat(self):
