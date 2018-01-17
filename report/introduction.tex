@@ -1,0 +1,54 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage[citestyle = authoryear, bibstyle = numeric, sorting = nyt, backend = biber]{biblatex}
+\usepackage{amsmath}
+\addbibresource{bibliography.bib}
+
+\title{introduction}
+\date{January 2018}
+
+\begin{document}
+
+%\maketitle
+
+\section{Introduction}
+
+%In the report you should first in the Introduction describe the article on such a level of detail that your peer students in this course understand the method, and so that it is clear to the reader that you understand the method too. You can put it in a wider context of the more recent state-of-the-art work that is built on the original contribution. Towards the end of the introduction you shoudl clearly and concisely outline the scope and objectives of your project.
+
+Text categorization has many applications in different areas. Some include information retrieval, spam filtering, sentiment analysis, language identification as well as protein- and gene identification. The Support Vector Machine (SVM) is a popular machine learning method in text categorization. SVM as a classifier tries to find a separating hyperplane between classes that maximize the margin between itself and its closest data points. Data is projected into a high-dimensional space, where the separating hyperplane is linear. The intractability of working in such high dimensions is solved with "the kernel trick". The kernel is a function that is given two input data points and returns the inner product between the two data points mapped into the high dimensional space. As long as a learning problem can be formulated with higher-dimensional data points only appearing in these inner products, there is no need to explicitly calculate the features, which constitutes a great saving in terms of performance.
+
+Some of the reasons why SVMs are helpful in text categorization are given by (\cite{joachims1998text}). The arguably most important is this: text categorization usually involves a large number of features. An SVM is well suited for this since one of its statistical properties is that its performance does not depend on the dimensionality of the space where the separating hyperplane is created, thanks to the kernel trick. There are also few irrelevant features in text. This means that it's hard to reduce the number of features, which brings us back to the aforementioned point. 
+
+\subsection{The String Subsequence Kernel (SSK)}
+
+Lodhi, Saunders, Shawe-Taylor, Cristianini and Watkins introduces in (\cite{Lodhi2002}) a new kernel to be used with SVMs in text classification. A novel thing about their approach is that it does not include converting the text documents to feature vectors. Instead, they view documents as raw strings, and the similarity of two documents as the number of substrings, contiguous as well as non-contiguous, they have in common. Note that a non-contiguous substring is simply an ordered set of non-adjacent characters from a string. The non-contigous substrings are penalized by a parameter $\lambda \in [0,1]$, so as to give higher weight to the contiguous substrings, seeing as how they contain more information. The kernel is then given as
+\begin{gather*}
+    K_n(s,t) = \sum_{u \in \Sigma^n} \sum_{\textbf{i}:u=s[\textbf{i}]} \sum_{\textbf{j}:u=t[\textbf{j}]} \lambda^{l(\textbf{i}) + l(\textbf{j})}
+\end{gather*}
+where $\Sigma^n$ is the set of all strings of length \textit{n} and \textbf{i} and \textbf{j} constitues indices of (contiguous or non-contiguous) substrings in the strings \textit{s} and \textit{t} that corresponds to the letters in u. l(\textbf{i}) and l(\textbf{j}) are "lengths" of the substrings given as l(\textbf{j})$ = j_{|u|} - j_1 + 1$. Thus, l(\textbf{j}) is given a higher value for a non-contiguous substring, since the difference between the last index and the first is greater. This means that the non-contiguous substrings are penalized exponentially with the value of $\lambda$. Furthermore, the number of occurrences of a substring will weigh in - every time \textit{u} appears in a string will be accounted for.
+\par
+
+%dunno how much in detail one should go here, in regards to the recursive formulation of the kernel
+This formulation of the kernel is computationally intractable, since it involves all possible strings in $\Sigma^n$. Therefore, two supporting functions are formulated to form a recursive definition of the kernel. The recursion builds on the idea of calculating $K_n(s,t)$ for increasing values for the length of \textit{u}, from 1 up to \textit{n}, while increasing the number of letters considered in \textit{s} and \textit{t}. This idea is realized through two helper functions $K_i'(s,t)$ and $K_i''(s,t)$ where \textit{i} = 1, ..., \textit{n}-1.
+
+One letter at a time is removed from one string, and that letter is then seen as the last letter in \textit{u}. Therefore, \textit{u} doesn't have to be taken from $\Sigma^n$, or $\Sigma^i$ when $i < n$, but can rather be inferred from the strings in question. Then each recursion incurs a factor of $\lambda$ to the final result. 
+The recursive formula can be solved using dynamic programming, to a final algorithm of a complexity O($n|s||t|$), where \textit{n} is the length of the subsequence considered, and $|s|$ and $|t|$ are the lengths of the two strings.
+\par
+However, even with this dynamic programming solution, the kernel is still expensive when building a gram matrix for a very big data set, or for a data set consisting of very long documents. With a data set of \textit{m} documents where the average length of a document is \textit{t} characters, and the length of subsequences considered is \textit{n}, the calculation of a gram matrix runs in O($m^2 n t^2$). This becomes intractable for long documents, or big data sets. 
+Therefore, the authors suggests an approximation of the learning algorithm. 
+
+The idea behind the approximation is to find a compact subset of the data called $\Tilde{S}$. If the construction of this set is done in a careful manner, an approximation of the kernel can be done where
+\begin{gather*}
+    K(x, z) \approx \sum_{s_i \in \Tilde{S}} K(x,s_i) K(z, s_i)
+\end{gather*}
+If the number of data points in $\Tilde{S}$ is the same as the dimensionality of the space in which the classification takes place, and the vectors $\phi(s_i)$ are all orthogonal to each other, this approximation will cease to be an approximation and will exactly reflect the real value of $K(x,z)$. The tradeoff here is that the smaller $|\Tilde{S}|$ is, the faster the calculation of the kernel will go, but the less closely it will resemble the true $K(x,z)$. The set $\Tilde{S}$ is chosen by the authors as the \textit{k} most common \textit{n}-grams, or contiguous substrings of length \textit{n}, present in the data set.
+
+If we then have a training set of size m, where the average length of the documents are t and a set $\Tilde{S}$ with \textit{l} entries, each of \textit{n'} characters, the average computation of one kernel value runs in O($lntn'$). Calculating the gram matrix, on the other hand, runs in O($mnn'lt + lm^2$). This because all the values K(x,z)
+
+
+
+
+
+
+\end{document}
+

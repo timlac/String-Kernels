@@ -137,7 +137,7 @@ def preprocess_regex(text):
     return ' '.join(filtered_words)
 
 
-def process_directory(path='../data/', category_filter=None):
+def process_directory(path='../data/', class_filter=None):
     """
     Reads and preprocesses the Reuters-21578 dataset.
 
@@ -147,7 +147,7 @@ def process_directory(path='../data/', category_filter=None):
     ----------
     path : string (optional)
         Path to dataset directory
-    category_filter : list(str) (optional)
+    class_filter : list(str) (optional)
         A list of which categories the documents should have.
 
     Returns
@@ -177,7 +177,7 @@ def process_directory(path='../data/', category_filter=None):
     for filename in filenames:
         print(filename)
         _train, _test, _titles, _texts, _classes = process_file(
-            path + filename, category_filter)
+            path + filename, class_filter)
         train.extend(_train)
         test.extend(_test)
         titles.update(_titles)
@@ -187,7 +187,7 @@ def process_directory(path='../data/', category_filter=None):
     return train, test, titles, texts, classes
 
 
-def process_file(filename, category_filter=None):
+def process_file(filename, class_filter=None):
     """
     Reads and preprocesses a file of the Reuters-21578 dataset.
 
@@ -197,7 +197,7 @@ def process_file(filename, category_filter=None):
     ----------
     filename : string (optional)
         Filename of the sgml file.
-    category_filter : list(str) (optional)
+    class_filter : list(str) (optional)
         A list of which categories the documents should have.
 
     Returns
@@ -232,35 +232,36 @@ def process_file(filename, category_filter=None):
                     document['lewissplit'] == 'TRAIN'
                     or document['lewissplit'] == 'TEST'):
                 document_id = int(document['newid'])
-                categories = []
+                cls = []
 
                 for topic in document.topics.contents:
-                    if category_filter is not None:
-                        if any(category in topic.contents
-                               for category in category_filter):
-                            categories.extend(topic.contents)
+                    if class_filter is not None:
+                        if any(cl in topic.contents
+                               for cl in class_filter):
+                            cls.extend(topic.contents)
                     else:
-                        categories.extend(topic.contents)
-                if categories:
-                    classes[document_id] = categories
-                    if document.title is None:
-                        title = ''
-                    else:
-                        title = document.title.contents[0]
+                        cls.extend(topic.contents)
+                classes[document_id] = cls
+                if document.title is None:
+                    title = ''
+                else:
+                    title = document.title.contents[0]
 
-                    titles[document_id] = title
+                titles[document_id] = title
 
-                    if document.body is None:
-                        body = ''
-                    else:
-                        body = document.body.contents[0]
+                if document.body is None:
+                    body = ''
+                else:
+                    body = document.body.contents[0]
                     text = title + ' ' + body
                     texts[document_id] = preprocess_regex(text)
 
-                    if document['lewissplit'] == 'TRAIN':
-                        train.append(document_id)
-                    else:
-                        test.append(document_id)
+                texts[document_id] = preprocess_regex(body)
+
+                if document['lewissplit'] == 'TRAIN':
+                    train.append(document_id)
+                else:
+                    test.append(document_id)
 
     return train, test, titles, texts, classes
 
