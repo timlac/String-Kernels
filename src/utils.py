@@ -4,25 +4,6 @@ from random import shuffle
 import numpy as np
 
 
-class TwoWayDict(dict):
-    def __setitem__(self, key, value):
-        # Remove any previous connections with these values
-        if key in self:
-            del self[key]
-        if value in self:
-            del self[value]
-        dict.__setitem__(self, key, value)
-        dict.__setitem__(self, value, key)
-
-    def __delitem__(self, key):
-        dict.__delitem__(self, self[key])
-        dict.__delitem__(self, key)
-
-    def __len__(self):
-        """Returns the number of connections"""
-        return dict.__len__(self) // 2
-
-
 def flatten(l):
     """
     Flatten a list of lists.
@@ -63,6 +44,12 @@ def shuffle_lists(*lists):
     """
     l = list(zip(*lists))
     shuffle(l)
+    return (list(x) for x in zip(*l))
+
+
+def sort_lists(list_to_sort_by, *lists):
+    l = list(zip(list_to_sort_by, *lists))
+    l.sort()
     return zip(*l)
 
 
